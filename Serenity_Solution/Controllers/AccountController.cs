@@ -451,7 +451,7 @@ namespace Serenity_Solution.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                TempData["ErrorMessage"] = "No account found with this email.";
+                TempData["ErrorMessage"] = "Không có Email trong hệ thống.";
                 return View();
             }
 
@@ -460,7 +460,7 @@ namespace Serenity_Solution.Controllers
 
             await _emailService.SendEmailAsync(user.Email, "Reset Password", $"Click here to reset your password: <a href='{resetLink}'>Reset Password</a>");
 
-            TempData["SuccessMessage"] = "Password reset link has been sent to your email.";
+            TempData["SuccessMessage"] = "Vui lòng kiểm tra Email";
             return RedirectToAction("Login");
         }
 

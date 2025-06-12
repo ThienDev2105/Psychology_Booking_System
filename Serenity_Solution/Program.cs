@@ -55,6 +55,11 @@ builder.Services.AddIdentity<User, ApplicationRole>(options => options.SignIn.Re
                         .AddEntityFrameworkStores<ApplicationDbContext>()
                         .AddDefaultTokenProviders();
 
+//builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
+//{
+//    hostingContext.HostingEnvironment.EnvironmentName = "Development";
+//});
+
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

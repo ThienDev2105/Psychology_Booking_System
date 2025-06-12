@@ -7,6 +7,13 @@
         <p>Vui lòng nhập email của bạn để đặt lại mật khẩu</p>
 
         <form asp-action="Forgot" asp-controller="Account" method="post" class="login-form">
+            @* Hiển thị thông báo lỗi *@
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div style="color: red; margin-bottom: 15px;">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
 
             @* Hiển thị thông báo lỗi *@
             @if (!ViewData.ModelState.IsValid)
@@ -158,4 +165,14 @@
             color: #333;
             font-size: 16px;
         }
+
+    .alert-error-custom {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
 </style>

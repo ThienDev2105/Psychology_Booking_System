@@ -7,6 +7,15 @@
         <p>Chào mừng trở lại. Vui lòng đăng nhập tài khoản của bạn</p>
 
         <form asp-action="Login" asp-controller="Account" method="post" class="login-form">
+            @* Hiển thị thông báo thành công *@
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div style="color: green; margin-bottom: 15px;">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+           
 
             @* Hiển thị thông báo lỗi *@
             @if (!ViewData.ModelState.IsValid)
@@ -209,6 +218,16 @@
         transform: translateY(-50%);
         cursor: pointer;
         color: #888;
+    }
+
+    .alert-success-custom {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
     }
 
 </style>

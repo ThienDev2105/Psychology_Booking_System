@@ -32,7 +32,7 @@ namespace Serenity_Solution.Controllers
             _context = context;
             _vpnPayServicecs = vnPayServicecs;
         }
-        public async Task<IActionResult> Index(string searchString, string filterType, int page = 1, int pageSize = 2)
+        public async Task<IActionResult> Index(string searchString, string filterType, int page = 1, int pageSize = 1)
         {
             var users = await _userManager.GetUsersInRoleAsync("Psychologist");
             var doctors = users.OfType<User>() // Lọc ra danh sách Customer

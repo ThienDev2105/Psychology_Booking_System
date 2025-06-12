@@ -20,7 +20,7 @@
             <div class="search-box">
                 <i class="search-icon">&#128269;</i>
                 <input type="text" name="searchString" placeholder="Search" value="@ViewBag.SearchString" />
-                <button type="submit">Search</button>
+                <button type="submit"></button>
             </div>
         </form>
     </div>
@@ -81,36 +81,67 @@
     </div>
 
     <!-- Pagination -->
-    <div class="pagination">
-        @if (ViewBag.TotalPages > 1)
-        {
+    <!-- Pagination -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="pagination">
             @if (ViewBag.CurrentPage > 1)
             {
-                <a href="?page=@(ViewBag.CurrentPage - 1)" class="pagination-btn">&laquo;</a>
+                <a  asp-action="Index" asp-route-page="1"  asp-route-search="@ViewBag.CurrentSearch" class="page-link">« First</a>
+                <a asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)" asp-route-search="@ViewBag.CurrentSearch" class="page-link">« Back</a>
             }
 
-            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
             {
-                if (i == ViewBag.CurrentPage)
-                {
-                    <button class="pagination-btn active">@i</button>
-                }
-                else
-                {
-                    <a href="?page=@i" class="pagination-btn">@i</a>
-                }
+                <a  asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.CurrentSearch"
+                   class="page-link @(i == ViewBag.CurrentPage ? "active" : "")">@i</a>
             }
 
             @if (ViewBag.CurrentPage < ViewBag.TotalPages)
             {
-                <a href="?page=@(ViewBag.CurrentPage + 1)" class="pagination-btn">&raquo;</a>
+                <a asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)"  asp-route-search="@ViewBag.CurrentSearch" class="page-link">Next »</a>
+                <a  asp-action="Index" asp-route-page="@ViewBag.TotalPages"  asp-route-search="@ViewBag.CurrentSearch" class="page-link">Last »</a>
             }
-        }
-    </div>
+        </div>
+        <div class="page-info">
+            Page @ViewBag.CurrentPage of @ViewBag.TotalPages
+        </div>
+    }
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<style>
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+        gap: 5px;
+    }
+
+    .page-link {
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #333;
+        background-color: #fff;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        transition: background-color 0.3s;
+    }
+
+        .page-link:hover, .page-link.active {
+            background-color: #0f5e72;
+            color: white;
+            border-color: #0f5e72;
+        }
+
+    .page-info {
+        text-align: center;
+        margin-top: 10px;
+        color: #666;
+        font-size: 14px;
+    }
+</style>
 <style>
     * {
         margin: 0;
