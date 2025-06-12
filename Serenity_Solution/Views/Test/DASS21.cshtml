@@ -11,9 +11,9 @@
         <div class="progress-text">Trạng thái hoàn thành</div>
         <div class="progress-container">
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 5%;"></div>
+                <div class="progress-fill" style="width: 0%;"></div>
             </div>
-            <div class="progress-count">1/21</div>
+            <div class="progress-count">0/21</div>
         </div>
     </div>
 
@@ -25,19 +25,19 @@
                 <p class="question-text">Tôi thấy khó mà thoải mái được</p>
                 <div class="options-container">
                     <label class="option-label">
-                        <input type="radio" asp-for="Question1" value="0" />
+                        <input type="radio" name="Question1" value="0" />
                         <span class="option-text">Không đúng với tôi chút nào cả</span>
                     </label>
                     <label class="option-label">
-                        <input type="radio" asp-for="Question1" value="1" />
+                        <input type="radio" name="Question1" value="1" />
                         <span class="option-text">Đúng với tôi một phần, hoặc thỉnh thoảng mới đúng</span>
                     </label>
                     <label class="option-label">
-                        <input type="radio" asp-for="Question1" value="2" />
+                        <input type="radio" name="Question1" value="2" />
                         <span class="option-text">Đúng với tôi phần nhiều, hoặc phần lớn thời gian là đúng</span>
                     </label>
                     <label class="option-label">
-                        <input type="radio" asp-for="Question1" value="3" />
+                        <input type="radio" name="Question1" value="3" />
                         <span class="option-text">Hoàn toàn đúng với tôi, hoặc hầu hết thời gian là đúng</span>
                     </label>
                 </div>
@@ -162,6 +162,24 @@
         function handleOptionSelection(questionNumber, isAnswered) {
             answeredQuestions[questionNumber - 1] = isAnswered;
             updateAnsweredQuestions();
+
+            // Tự động chuyển sang câu hỏi tiếp theo nếu không phải câu cuối
+            if (questionNumber < totalQuestions) {
+                document.querySelector(`[data-question="${questionNumber}"]`).style.display = 'none';
+                currentQuestion = questionNumber + 1;
+                document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'block';
+
+                // Cập nhật trạng thái nút
+                document.getElementById('prev-btn').disabled = false;
+                if (currentQuestion === totalQuestions) {
+                    document.getElementById('next-btn').style.display = 'none';
+                    document.getElementById('submit-btn').style.display = 'inline-block';
+                }
+            } else {
+                // Nếu là câu cuối, hiển thị nút gửi kết quả
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('submit-btn').style.display = 'inline-block';
+            }
         }
 
         // Khởi tạo
@@ -174,22 +192,6 @@
                     const questionNumber = parseInt(this.closest('.question-item').dataset.question);
                     handleOptionSelection(questionNumber, true);
                 });
-            });
-
-            // Xử lý nút Next
-            document.getElementById('next-btn').addEventListener('click', function() {
-                if (currentQuestion < totalQuestions) {
-                    document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'none';
-                    currentQuestion++;
-                    document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'block';
-
-                    // Cập nhật trạng thái nút
-                    document.getElementById('prev-btn').disabled = false;
-                    if (currentQuestion === totalQuestions) {
-                        this.style.display = 'none';
-                        document.getElementById('submit-btn').style.display = 'inline-block';
-                    }
-                }
             });
 
             // Xử lý nút Previous
@@ -232,11 +234,9 @@
         padding: 20px;
     }
 
-
     .test-progress-bar {
         margin-bottom: 20px;
     }
-
 
     .progress-text {
         font-size: 14px;
@@ -280,12 +280,11 @@
         margin-bottom: 20px;
     }
 
-        .question-item h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
+    .question-item h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: #333;
+    }
 
     .question-text {
         font-size: 16px;
@@ -307,18 +306,17 @@
         transition: background-color 0.2s;
     }
 
-        .option-label:hover {
-            background-color: #e9ecef;
-        }
+    .option-label:hover {
+        background-color: #e9ecef;
+    }
 
-        .option-label.selected {
-            background-color: #cce5ff;
-        }
+    .option-label.selected {
+        background-color: #cce5ff;
+    }
 
-        .option-label input[type="radio"] {
-            margin-right: 10px;
-        }
-
+    .option-label input[type="radio"] {
+        margin-right: 10px;
+    }
 
     .navigation-buttons {
         display: flex;

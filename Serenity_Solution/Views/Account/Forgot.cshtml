@@ -15,6 +15,13 @@
                 </div>
             }
 
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert-error-custom">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
             @* Hiển thị thông báo lỗi *@
             @if (!ViewData.ModelState.IsValid)
             {

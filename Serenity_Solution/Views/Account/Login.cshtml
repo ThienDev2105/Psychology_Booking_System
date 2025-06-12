@@ -17,6 +17,13 @@
 
            
 
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert-success-custom">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
             @* Hiển thị thông báo lỗi *@
             @if (!ViewData.ModelState.IsValid)
             {
@@ -55,6 +62,7 @@
             <p class="login-google">Hoặc đăng nhập với <a asp-action="LoginWithGoogle">Google</a></p>
         </form>
     </div>
+
 
     <div class="login-right">
         <img src="https://i.pinimg.com/736x/8c/45/81/8c45816eae00c1a5e0b6ac7bb9c87eca.jpg" alt="login illustration" />
@@ -171,14 +179,14 @@
     }
 
     .login-google {
-      margin-top: 20px;
-      font-size: 14px;
+        margin-top: 20px;
+        font-size: 14px;
     }
 
-    .login-google a {
-      color: #0ea5e9;
-      text-decoration: none;
-    }
+        .login-google a {
+            color: #0ea5e9;
+            text-decoration: none;
+        }
 
     .login-right {
       flex: 1;

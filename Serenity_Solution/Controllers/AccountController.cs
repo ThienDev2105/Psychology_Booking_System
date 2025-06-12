@@ -451,7 +451,7 @@ namespace Serenity_Solution.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                TempData["ErrorMessage"] = "Không có Email trong hệ thống.";
+                TempData["ErrorMessage"] = "Không tìm thấy tài khoản";
                 return View();
             }
 
@@ -460,7 +460,7 @@ namespace Serenity_Solution.Controllers
 
             await _emailService.SendEmailAsync(user.Email, "Reset Password", $"Click here to reset your password: <a href='{resetLink}'>Reset Password</a>");
 
-            TempData["SuccessMessage"] = "Vui lòng kiểm tra Email";
+            TempData["SuccessMessage"] = "Link đặt lại đã gửi đến email của bạn";
             return RedirectToAction("Login");
         }
 
@@ -711,63 +711,6 @@ namespace Serenity_Solution.Controllers
 
         }
 
-        // Nhận thông tin phản hồi từ Google sau khi đăng nhập thành công
-        /*
-        [HttpGet("/signin-google")]
-        public async Task<IActionResult> SignInGoogle()
-        {
-            return await GoogleResponse();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GoogleResponse()
-        {
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-                return RedirectToAction("Login");
-
-            // Tìm xem user đã từng login bằng Google chưa
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            // Nếu chưa có, tạo user mới
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var name = info.Principal.FindFirstValue(ClaimTypes.Name);
-
-            var user = new User
-            {
-                UserName = email,
-                Email = email,
-                Name = name,
-                DateOfBirth = DateTime.Now
-            };
-
-            var identityResult = await _userManager.CreateAsync(user);
-            if (identityResult.Succeeded)
-            {
-                identityResult = await _userManager.AddLoginAsync(user, info);
-                if (identityResult.Succeeded)
-                {
-                    // Thêm vai trò Customer nếu muốn
-                    await _userManager.AddToRoleAsync(user, "Customer");
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
-                }
-            }
-
-            // Nếu có lỗi
-            foreach (var error in identityResult.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return RedirectToAction("Login");
-        }
-        */
         public async Task<IActionResult> GoogleResponse()
         {
             try
@@ -853,7 +796,6 @@ namespace Serenity_Solution.Controllers
                 return RedirectToAction("Login");
             }
         }
-
 
     }
 }

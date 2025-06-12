@@ -70,13 +70,18 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     })
     .AddGoogle(googleOptions =>
-     {
-         googleOptions.ClientId = builder.Configuration["GoogleKeys:ClientID"];
-         googleOptions.ClientSecret = builder.Configuration["GoogleKeys:ClientSecret"];
-         googleOptions.SaveTokens = true;
-         // Đặt CallbackPath trùng với action controller
-         //googleOptions.CallbackPath = "/signin-google";
-     });
+ {
+     googleOptions.ClientId = builder.Configuration["GoogleKeys:ClientID"];
+     googleOptions.ClientSecret = builder.Configuration["GoogleKeys:ClientSecret"];
+     googleOptions.SaveTokens = true;
+     // Đặt CallbackPath trùng với action controller
+     //googleOptions.CallbackPath = "/signin-google";
+ });
+
+void AddGoogle(Action<object> value)
+{
+    throw new NotImplementedException();
+}
 
 builder.Services.AddAuthorization(); // Ensure authorization is added
 // Add services to the container.
