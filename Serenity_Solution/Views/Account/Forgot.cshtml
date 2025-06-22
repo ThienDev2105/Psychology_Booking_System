@@ -7,6 +7,13 @@
         <p>Vui lòng nhập email của bạn để đặt lại mật khẩu</p>
 
         <form asp-action="Forgot" asp-controller="Account" method="post" class="login-form">
+            @* Hiển thị thông báo lỗi *@
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div style="color: red; margin-bottom: 15px;">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
 
             @if (TempData["ErrorMessage"] != null)
             {

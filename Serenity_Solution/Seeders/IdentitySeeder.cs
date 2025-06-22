@@ -9,17 +9,17 @@ namespace Serenity_Solution.Seeders
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
+            //them  
+            string[] roleNames = { "Admin", "Psychologist", "Customer" };
 
-            //string[] roleNames = { "Admin", "Psychologist", "Customer" };
-
-            //foreach (var roleName in roleNames)
-            //{
-            //    if (!await roleManager.RoleExistsAsync(roleName))
-            //    {
-            //        await roleManager.CreateAsync(new ApplicationRole(roleName));
-            //    }
-            //}
-
+            foreach (var roleName in roleNames)
+            {
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new ApplicationRole(roleName));
+                }
+            }
+            // Tìm hoặc tạo user Admin
             if (userManager.Users.All(u => u.Email != "admin@example.com"))
             {
                 var adminUser = new Admin

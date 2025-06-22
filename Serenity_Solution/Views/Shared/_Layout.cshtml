@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Serenity Solution</title>
+    <link rel="icon" type="image/png" href="@Url.Content("~/image/LogoSere.jpg")" />
     <link rel="stylesheet" href="@Url.Content("~/css/HomePage.css")" />
     <link rel="stylesheet" href="@Url.Content("~/css/chatbot.css")" />
     <!-- FontIcons (ví dụ: https://fontisto.com hoặc fonticon.io) -->
@@ -22,10 +23,14 @@
                 <span><strong>Serenity</strong> Solution</span>
             </div>
             <nav class="main-nav">
-                <a asp-controller="Home" asp-action="Index" class="active">Trang chủ</a>
-                <a class="nav-link text-dark" asp-controller="Podcast" asp-action="Index">Podcast</a>
-                <a class="nav-link text-dark" asp-controller="Test" asp-action="Index">Kiểm tra tâm lý</a>
-                <a class="nav-link text-dark" asp-controller="Doctor" asp-action="Index">Danh sách bác sĩ</a>
+                <a asp-controller="Home" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">Trang chủ</a>
+                <a asp-controller="Podcast" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Podcast" ? "active" : "")">Podcast</a>
+                <a asp-controller="Test" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Test" ? "active" : "")">Kiểm tra tâm lý</a>
+                <a asp-controller="Doctor" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Doctor" ? "active" : "")">Danh sách bác sĩ</a>
             </nav>
             <div class="auth-buttons">
                 @if (User.Identity.IsAuthenticated)
@@ -125,6 +130,32 @@
 </body>
 </html>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.main-nav a');
+
+        navLinks.forEach(link => {
+            if (link.classList.contains('active')) {
+                updateIndicator(link);
+            }
+
+            link.addEventListener('click', function() {
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                updateIndicator(this);
+            });
+        });
+
+        function updateIndicator(activeLink) {
+            const nav = document.querySelector('.main-nav');
+            const left = activeLink.offsetLeft;
+            const width = activeLink.offsetWidth;
+
+            nav.style.setProperty('--indicator-left', `${left}px`);
+            nav.style.setProperty('--indicator-width', `${width}px`);
+        }
+    });
+</script>
 
 
 

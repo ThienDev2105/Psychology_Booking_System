@@ -374,8 +374,13 @@ body {
     text-align: center;
     border: 1px solid #e5e7eb;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+    .doctor-card:hover {
+        transform: translateY(-5px); /* Di chuyển lên 5px khi hover */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Tăng shadow để tạo hiệu ứng nổi */
+    }
     .doctor-card img {
         width: 80px;
         height: 80px;

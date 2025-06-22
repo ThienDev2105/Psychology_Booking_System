@@ -7,6 +7,15 @@
         <p>Chào mừng trở lại. Vui lòng đăng nhập tài khoản của bạn</p>
 
         <form asp-action="Login" asp-controller="Account" method="post" class="login-form">
+            @* Hiển thị thông báo thành công *@
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div style="color: green; margin-bottom: 15px;">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+           
 
             @if (TempData["SuccessMessage"] != null)
             {

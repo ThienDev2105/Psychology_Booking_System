@@ -65,8 +65,6 @@ namespace Serenity_Solution.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
             ViewBag.CurrentPage = page;
             // Gửi danh sách Staff kèm ID (dùng ViewBag nếu cần)
-            ViewBag.StaffIds = customers.ToDictionary(s => s.Email, s => s.Id);
-
             return View(pagedUsers);
 
         }
