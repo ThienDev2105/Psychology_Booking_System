@@ -453,7 +453,7 @@
                         <svg class="detail-icon" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                         </svg>
-                        <span class="detail-label">Major:</span>
+                        <span class="detail-label">Chức vụ:</span>
                         <span>@Model.Major</span>
                     </div>
 
@@ -462,8 +462,9 @@
                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                         </svg>
                         <span class="detail-label">Kinh nghiệm:</span>
-                        <span>@Model.Experience năm</span>
+                        <span>@Html.Raw(Model.Experience.Replace("\n", "<br/>"))</span>
                     </div>
+
                     <div class="detail-item">
                         <svg class="detail-icon" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
@@ -480,6 +481,7 @@
                     {
                         <button class="tab" onclick="showTab('education')">Bằng cấp</button>
                     }
+                    <button class="tab" onclick="showTab('experience')">Bằng cấp</button>
                 </div>
 
                 <!-- Tab Content -->

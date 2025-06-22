@@ -8,6 +8,7 @@ using EXE201.Services.Interfaces;
 using EXE201.Services.Models;
 using EXE201.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -74,8 +75,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
      googleOptions.ClientId = builder.Configuration["GoogleKeys:ClientID"];
      googleOptions.ClientSecret = builder.Configuration["GoogleKeys:ClientSecret"];
      googleOptions.SaveTokens = true;
-     // Đặt CallbackPath trùng với action controller
-     //googleOptions.CallbackPath = "/signin-google";
+     
  });
 
 void AddGoogle(Action<object> value)
@@ -131,6 +131,20 @@ app.UseRouting();
 app.UseSession();//them
 app.UseAuthentication();
 app.UseAuthorization();
+//them
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(exceptionHandlerPathFeature?.Error, "Unhandled exception");
+
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync("An unexpected error occurred.");
+    });
+});
+
 
 app.MapControllerRoute(
     name: "default",

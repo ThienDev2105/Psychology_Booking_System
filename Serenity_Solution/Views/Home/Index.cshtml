@@ -105,6 +105,7 @@
 </div>
 
 <script>
+    /*
         document.addEventListener('DOMContentLoaded', function() {
         const askTab = document.getElementById('askTab');
         const contactSection = document.querySelector('.contact-section');
@@ -126,7 +127,49 @@
         if (hash === '#contact') {
             scrollToContact();  // tự động cuộn khi trang load nếu URL có #contact
         }
+    });*/
+        document.addEventListener('DOMContentLoaded', function() {
+        const askTab = document.getElementById('askTab');
+        const contactSection = document.querySelector('.contact-section');
+
+        function scrollToContact(e) {
+            if (e) e.preventDefault();
+
+            // Thêm class 'visible' để kích hoạt hiệu ứng
+            contactSection.classList.add('visible');
+
+            const contactPosition = contactSection.getBoundingClientRect().top + window.pageYOffset - 100; // Trừ đi 100px để không bị dính sát trên cùng
+
+            window.scrollTo({
+                top: contactPosition,
+                behavior: 'smooth'
+            });
+
+            // Focus vào trường đầu tiên của form
+            setTimeout(() => {
+                const firstInput = contactSection.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }, 500);
+        }
+        askTab.addEventListener('click', scrollToContact);
+        // Kiểm tra hash khi trang load
+        const hash = window.location.hash;
+        if (hash === '#contact') {
+            setTimeout(scrollToContact, 100); // Thêm delay nhỏ để đảm bảo trang đã load xong
+        }
+
+        // Xử lý khi click từ trang khác
+        if (window.location.pathname === '/Home/Index' && hash === '#contact') {
+            setTimeout(scrollToContact, 300); // Delay dài hơn khi chuyển từ trang khác
+        }
     });
+
+        window.addEventListener('hashchange', function() {
+        if (window.location.hash === '#contact') {
+            scrollToContact();
+        }
+    });
+
 
 </script>
 
@@ -270,7 +313,15 @@
         margin-left: auto;
         margin-right: auto;
         margin-bottom: 20px;
+        /* transition: opacity 0.5s ease, transform 0.5s ease;
+        opacity: 0;
+        transform: translateY(20px); */
     }
+
+        .contact-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
     .contact-title {
         display: flex;
@@ -389,5 +440,111 @@
             font-size: 16px;
         }
 
-    
+    /* Doctor Section - Redesigned */
+    .doctor-section {
+        padding: 40px 20px;
+        text-align: center;
+        background-color: #f9f9f9;
+        margin-top: 40px;
+    }
+
+        .doctor-section h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+            .doctor-section h2 span {
+                color: #007bff;
+            }
+
+        .doctor-section .description {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+    .doctor-list-wrapper {
+        overflow-x: auto;
+        padding: 20px 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .doctor-list-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+    .doctor-list {
+        display: flex;
+        gap: 20px;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        min-width: max-content;
+    }
+
+    .doctor-card {
+        flex: 0 0 250px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        /* transition: all 0.3s ease; */
+        transition: transform 0.3s;
+        padding: 15px;
+        text-align: center;
+    }
+
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .doctor-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 15px;
+            border: 3px solid #e6f2ff;
+            transition: all 0.3s ease;
+        }
+
+        .doctor-card:hover img {
+            border-color: #007bff;
+            transform: scale(1.05);
+        }
+
+        .doctor-card h4 {
+            font-size: 1.2rem;
+            margin: 10px 0 5px;
+            color: #333;
+        }
+
+        .doctor-card p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+
+    .contact-btn {
+        display: inline-block;
+        padding: 8px 20px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+        .contact-btn:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
 </style>

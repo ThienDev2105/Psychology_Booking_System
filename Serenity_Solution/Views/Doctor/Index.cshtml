@@ -54,9 +54,9 @@
                         <img src="@doctor.ProfilePictureUrl" alt="@doctor.Name" class="doctor-avatar" />
                         <div class="doctor-details">
                             <h3 class="doctor-name">@doctor.Name</h3>
-                            <p class="doctor-specialty">Chuyên gia tâm lý</p>
+                            <p class="doctor-specialty">@doctor.Major</p>
                             <p class="doctor-location">📍@(string.IsNullOrEmpty(doctor.Address) ? "Chưa cập nhật địa chỉ" : doctor.Address)</p>
-                            <p class="doctor-experience">🗓️ @(doctor.Experience ?? "Chưa cập nhật kinh nghiệm") năm</p>
+                            <p class="doctor-experience">🗓️ @Html.Raw((doctor.Experience ?? "Chưa cập nhật kinh nghiệm").Replace("\n", "<br/>"))</p>
                             @if (doctor.Description != null)
                             {
                                 <p class="doctor-description">📝 @doctor.Description</p>
@@ -109,6 +109,13 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+        // Trong Doctor Page
+    document.querySelector('.tab[href="#contact"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = '/Home/Index#contact';
+    });
+</script>
 
 <style>
     .pagination {
@@ -144,7 +151,7 @@
 
 
 <style>
-    * {
+    @* * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -154,7 +161,7 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background-color: #f8f9fa;
         color: #333;
-    }
+    } *@
 
     
 
@@ -257,6 +264,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        margin: auto;
     }
 
     .doctor-price strong {

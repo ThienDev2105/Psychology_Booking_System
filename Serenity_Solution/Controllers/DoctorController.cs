@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Serenity_Solution.Models;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Serenity_Solution.Controllers
@@ -84,6 +85,7 @@ namespace Serenity_Solution.Controllers
                      Price = s.Price,
                      Description = s.Description,
                      Experience = s.Experience,
+                     Major = s.Major ?? "Chưa cập nhật",
                      ProfilePictureUrl = s.ProfilePictureUrl,                  
                  })
                  .ToList();
@@ -105,6 +107,11 @@ namespace Serenity_Solution.Controllers
         {
             var user = await _userManager.FindByIdAsync(Id);
             if (user == null) { return NotFound(); }
+
+            var experienceFormat = string.IsNullOrEmpty(user.Experience)
+                ? ""
+                : Regex.Replace(user.Experience, @"(?<=• \d{4}-\d{4}:.*?)(?= • \d{4}-\d{4}:)", "\n");
+
             var psychologist = new PsychologistViewModel
             {
                 Id = user.Id,
@@ -114,7 +121,7 @@ namespace Serenity_Solution.Controllers
                 Address = user.Address,
                 Degree = user.CertificateUrl,
                 Description = user.Description,
-                Experience = user.Experience,
+                Experience = experienceFormat,
                 Price = user.Price,
                 ProfilePictureUrl = user.ProfilePictureUrl,// hoặc null để dùng ảnh mặc định
                 Major = user.Major,

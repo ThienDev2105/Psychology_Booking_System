@@ -1,20 +1,22 @@
-﻿using EXE201.Commons.Data;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using EXE201.Commons.Data;
+using EXE201.Commons.Migrations;
 using EXE201.Commons.Models;
 using EXE201.Services.Interfaces;
 using Humanizer;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Serenity_Solution.Models;
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
-using CloudinaryDotNet.Actions;
-using CloudinaryDotNet;
-using Microsoft.AspNetCore.Rewrite;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using System.Text.RegularExpressions;
 
 namespace Serenity_Solution.Controllers
 {
@@ -124,6 +126,12 @@ namespace Serenity_Solution.Controllers
             return RedirectToAction("Login");
         }
         // Display all users
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> Index()
         {
             var users = await _accountService.GetAllUsersAsync();
@@ -173,12 +181,48 @@ namespace Serenity_Solution.Controllers
 
             if (doctor == null) return NotFound();
 
+
+            if (!string.IsNullOrEmpty(model.Experience))
+            {
+                string[] lines = model.Experience.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                List<string> formattedExperience = new List<string>();
+
+                foreach (var rawLine in lines)
+                {
+                    string line = rawLine.Trim();
+
+                    // Kiểm tra mốc thời gian dạng YYYY-YYYY: ở đầu dòng
+                    if (Regex.IsMatch(line, @"^\d{4}-\d{4}:"))
+                    {
+                        // Nếu chưa có "•" ở đầu thì thêm
+                        if (!line.StartsWith("• "))
+                        {
+                            line = "• " + line;
+                        }
+                    }
+                    else
+                    {
+                        // Nếu dòng không bắt đầu bằng • thì thêm
+                        if (!line.StartsWith("• "))
+                        {
+                            line = "• " + line;
+                        }
+                    }
+
+                    formattedExperience.Add(line);
+                }
+
+                model.Experience = string.Join("\n", formattedExperience);
+            }
+
+
+
             doctor.Name = model.Name;
             doctor.Email = model.Email;
             doctor.PhoneNumber = model.Phone;
             doctor.Address = model.Address;
             doctor.Description = model.Description;
-            doctor.Experience = model.Experience; // Giả sử Degree là URL của chứng chỉ
+            doctor.Experience = model.Experience; 
             doctor.Price = model.Price;
             doctor.Major = model.Major;
 
@@ -377,6 +421,10 @@ namespace Serenity_Solution.Controllers
 
             // map dữ liệu vào view model...
 
+            var experienceFormat = string.IsNullOrEmpty(psychologist.Experience)
+                ? ""
+                : Regex.Replace(psychologist.Experience, @"(?<=• \d{4}-\d{4}:.*?)(?= • \d{4}-\d{4}:)", "\n");
+
 
             var model = new PsychologistViewModel
             {
@@ -387,7 +435,7 @@ namespace Serenity_Solution.Controllers
                 Description = psychologist.Description,
                 Phone = psychologist.PhoneNumber,
                 Address = user.Address,
-                Experience = psychologist.Experience,
+                Experience = experienceFormat,
                 Price = psychologist.Price,
                 ProfilePictureUrl = psychologist.ProfilePictureUrl,
                 Major = psychologist.Major,
