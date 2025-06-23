@@ -48,11 +48,13 @@
                             else if (User.IsInRole("Psychologist"))
                             {
                                 <a asp-controller="Account" asp-action="PsychologistProfile" class="dropdown-item">Tài khoản bác sĩ</a>
+                                <a asp-controller="Chat" asp-action="Index" class="dropdown-item"><i class="fas fa-comments"></i> Tin nhắn</a>                                
                             }
                             else if (User.IsInRole("Customer"))
                             {
                                 <a asp-controller="Account" asp-action="CustomerDashboard" class="dropdown-item">Dashboard</a>
                                 <a asp-controller="Account" asp-action="CustomerProfile" class="dropdown-item">Tài khoản của bạn</a>
+                                <a asp-controller="Chat" asp-action="Index" class="dropdown-item"><i class="fas fa-comments"></i> Tin nhắn</a>
                             }
                             <div class="dropdown-divider"></div>
                             <a asp-controller="Account" asp-action="Logout" class="dropdown-item">Đăng xuất</a>

@@ -7,6 +7,7 @@ using EXE201.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Serenity_Solution.Models;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -209,8 +210,28 @@ namespace Serenity_Solution.Controllers
                 await _userManager.UpdateAsync(doctorSelected);
                 await _context.SaveChangesAsync();
 
-                TempData["success"] = "Thanh toán thành công";
+     // 2. create conversation
+                var existingConversation = await _context.Conversations
+                .FirstOrDefaultAsync(c =>
+                    (c.User1Id == currentUser.Id && c.User2Id == doctorSelected.Id) ||
+                    (c.User1Id == doctorSelected.Id && c.User2Id == currentUser.Id));
 
+                if (existingConversation == null)
+                {
+                    // 3. Nếu chưa có -> Tạo Conversation mới
+                    var conversation = new Conversation
+                    {
+                        User1Id = currentUser.Id,
+                        User2Id = doctorSelected.Id
+                    };
+
+                    _context.Conversations.Add(conversation);
+                    await _context.SaveChangesAsync();
+
+                    
+                }
+                //end
+                TempData["success"] = "Thanh toán thành công";
                 return RedirectToAction("Detail", "Doctor", new { Id = doctorId });
             }
             catch (Exception ex)

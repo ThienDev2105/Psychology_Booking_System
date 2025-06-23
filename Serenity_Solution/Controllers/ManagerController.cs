@@ -201,7 +201,7 @@ namespace Serenity_Solution.Controllers
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                TempData["ErrorMessage"] = "Không tìm thấy user.";
+                TempData["ErrorUpgrade"] = "Không tìm thấy user.";
                 return RedirectToAction("UpgradeRequest");
             }
 
@@ -209,7 +209,7 @@ namespace Serenity_Solution.Controllers
             var isInCustomerRole = await _userManager.IsInRoleAsync(user, "Customer");
             if (!isInCustomerRole)
             {
-                TempData["ErrorMessage"] = "User không phải là Customer hoặc đã được nâng cấp.";
+                TempData["ErrorUpgrade"] = "User không phải là Customer hoặc đã được nâng cấp.";
                 return RedirectToAction("UpgradeRequest");
             }
 
@@ -217,7 +217,7 @@ namespace Serenity_Solution.Controllers
             var removeResult = await _userManager.RemoveFromRoleAsync(user, "Customer");
             if (!removeResult.Succeeded)
             {
-                TempData["ErrorMessage"] = "Xóa role Customer thất bại.";
+                TempData["ErrorUpgrade"] = "Xóa role Customer thất bại.";
                 return RedirectToAction("UpgradeRequest");
             }
 
@@ -225,11 +225,11 @@ namespace Serenity_Solution.Controllers
             var addResult = await _userManager.AddToRoleAsync(user, "Psychologist");
             if (!addResult.Succeeded)
             {
-                TempData["ErrorMessage"] = "Thêm role Psychologist thất bại.";
+                TempData["ErrorUpgrade"] = "Thêm role Psychologist thất bại.";
                 return RedirectToAction("UpgradeRequest");
             }
 
-            TempData["SuccessMessage"] = $"Nâng cấp user {email} thành công.";
+            TempData["SuccessUpgrade"] = $"Nâng cấp user {email} thành công.";
             await _emailService.SendEmailAsync(user.Email, "Nâng cấp thành công", "Bạn đã trở thành nhà tâm lý học của hệ thống chúng tôi!");
 
             return RedirectToAction("UpgradeRequest");

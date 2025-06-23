@@ -1,0 +1,600 @@
+﻿@using EXE201.Commons.Models
+@model IEnumerable<Conversation>
+@{
+    ViewData["Title"] = "Tin nhắn";
+    var currentUserId = ViewBag.CurrentUserId as string;
+}
+
+<div class="chat-container">
+    <!-- Left Panel - Conversations List -->
+    <div class="conversations-panel">
+        <div class="conversations-header">
+            <h4 class="mb-0">
+                <i class="fas fa-comments me-2"></i> Tin nhắn
+            </h4>
+        </div>
+
+        <div class="conversations-list">
+            @if (Model.Any())
+            {
+                @foreach (var conversation in Model)
+                {
+                    var otherUser = conversation.User1Id == currentUserId ? conversation.User2 : conversation.User1;
+                    var lastMessage = conversation.LastMessage;
+                    var messageText = lastMessage?.MessageText ?? "Chưa có tin nhắn";
+                    var displayTime = lastMessage?.Timestamp.ToString("HH:mm dd/MM") ?? "";
+
+                    <div class="conversation-item" data-conversation-id="@conversation.ConversationId"
+                         data-other-user="@otherUser.Name" data-other-user-avatar="@otherUser.ProfilePictureUrl"
+                         data-other-user-degree="@otherUser.Degree">
+                        <div class="conversation-avatar">
+                            @if (!string.IsNullOrEmpty(otherUser.ProfilePictureUrl))
+                            {
+                                <img src="@otherUser.ProfilePictureUrl" alt="Avatar" />
+                            }
+                            else
+                            {
+                                <div class="avatar-placeholder">
+                                    @(otherUser.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")
+                                </div>
+                            }
+                        </div>
+                        <div class="conversation-info">
+                            <div class="conversation-header">
+                                <h6 class="conversation-name">@otherUser.Name</h6>
+                                <small class="conversation-time">@displayTime</small>
+                            </div>
+                            <div class="conversation-preview">
+                                @if (lastMessage != null && lastMessage.SenderId == currentUserId)
+                                {
+                                    <span class="message-sender">Bạn: </span>
+                                }
+                                <span class="message-text">@(messageText.Length > 50 ? messageText.Substring(0, 50) + "..." : messageText)</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-conversations">
+                    <i class="fas fa-comments fa-3x mb-3"></i>
+                    <h5>Chưa có cuộc trò chuyện</h5>
+                    <p>Các cuộc trò chuyện sẽ xuất hiện ở đây</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Panel - Chat Area -->
+    <div class="chat-panel">
+        <div class="chat-welcome" id="chatWelcome">
+            <div class="welcome-content">
+                <i class="fas fa-comments fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted">Chào mừng đến với Tin nhắn</h3>
+                <p class="text-muted">Chọn một cuộc trò chuyện để bắt đầu</p>
+            </div>
+        </div>
+
+        <div class="chat-content" id="chatContent" style="display: none;">
+            <!-- Chat header -->
+            <div class="chat-header">
+                <div class="d-flex align-items-center">
+                    <div class="chat-avatar me-3" id="chatAvatar">
+                        <!-- Avatar will be inserted here -->
+                    </div>
+                    <div>
+                        <h5 class="mb-0" id="chatUserName">Tên người dùng</h5>
+                        <small class="text-muted" id="chatUserInfo">Thông tin</small>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="refreshChat()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages container -->
+            <div class="messages-container" id="messagesContainer">
+                <div class="loading-messages" id="loadingMessages">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message input -->
+            <div class="message-input-container">
+                <form id="messageForm" class="message-form">
+                    <input type="hidden" id="conversationId" />
+                    <div class="input-group">
+                        <input type="text" id="messageInput" class="form-control"
+                               placeholder="Nhập tin nhắn..." maxlength="1000" />
+                        <button type="submit" class="btn btn-primary" id="sendButton">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Main Chat Container */
+    .chat-container {
+        height: 100vh;
+        display: flex;
+        background-color: #f0f2f5;
+    }
+
+    /* Left Panel - Conversations */
+    .conversations-panel {
+        width: 350px;
+        background-color: white;
+        border-right: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .conversations-header {
+        padding: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        background-color: #f8f9fa;
+    }
+
+    .conversations-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .conversation-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+        .conversation-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .conversation-item.active {
+            background-color: #e3f2fd;
+            border-right: 3px solid #2196f3;
+        }
+
+    .conversation-avatar {
+        margin-right: 15px;
+        position: relative;
+    }
+
+        .conversation-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+    .avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #6c757d;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .conversation-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .conversation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .conversation-name {
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .conversation-time {
+        color: #999;
+        font-size: 12px;
+    }
+
+    .conversation-preview {
+        color: #666;
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .message-sender {
+        color: #2196f3;
+        font-weight: 500;
+    }
+
+    .empty-conversations {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    /* Right Panel - Chat */
+    .chat-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+    }
+
+    .chat-welcome {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fafafa;
+    }
+
+    .welcome-content {
+        text-align: center;
+    }
+
+    .chat-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .chat-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-avatar img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .chat-avatar .avatar-placeholder {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        background-image: radial-gradient(circle at 25px 25px, rgba(255,255,255,.2) 2%, transparent 2%), radial-gradient(circle at 75px 75px, rgba(255,255,255,.2) 2%, transparent 2%);
+        background-size: 100px 100px;
+    }
+
+    .loading-messages {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+    }
+
+    .message-input-container {
+        padding: 15px 20px;
+        background-color: white;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .message-form .input-group {
+        max-width: none;
+        display: flex;
+    }
+
+    .message-form input {
+        border-radius: 25px;
+        padding: 12px 20px;
+        border: 1px solid #ddd;
+        width: 80%;
+    }
+
+    .message-form button {
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        margin-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Message Styles */
+    .message-item {
+        margin-bottom: 15px;
+        display: flex;
+    }
+
+        .message-item.sent {
+            justify-content: flex-end;
+        }
+
+        .message-item.received {
+            justify-content: flex-start;
+        }
+
+    .message-bubble {
+        max-width: 70%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        word-wrap: break-word;
+        position: relative;
+    }
+
+        .message-bubble.sent {
+            background-color: #2196f3;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-bubble.received {
+            background-color: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+
+    .message-time {
+        font-size: 11px;
+        margin-top: 5px;
+        opacity: 0.7;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .conversations-panel
+
+    {
+        width: 100%;
+        position: absolute;
+        z-index: 1000;
+        height: 100%;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .conversations-panel.show {
+        transform: translateX(0);
+    }
+
+    .chat-panel {
+        width: 100%;
+    }
+
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let currentConversationId = null;
+        let lastMessageId = 0;
+        let messagePollingInterval = null;
+
+        // Handle conversation selection
+        $('.conversation-item').on('click', function() {
+            const conversationId = $(this).data('conversation-id');
+            const otherUserName = $(this).data('other-user');
+            const otherUserAvatar = $(this).data('other-user-avatar');
+            const otherUserDegree = $(this).data('other-user-degree');
+
+            selectConversation(conversationId, otherUserName, otherUserAvatar, otherUserDegree);
+
+            // Update active state
+            $('.conversation-item').removeClass('active');
+            $(this).addClass('active');
+        });
+
+        // Handle message form submission
+        $('#messageForm').on('submit', function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+
+        // Handle Enter key
+        $('#messageInput').on('keypress', function(e) {
+            if (e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function selectConversation(conversationId, userName, userAvatar, userDegree) {
+            currentConversationId = conversationId;
+
+            // Hide welcome screen and show chat
+            $('#chatWelcome').hide();
+            $('#chatContent').show();
+
+            // Update chat header
+            $('#chatUserName').text(userName);
+            $('#chatUserInfo').text(userDegree || 'Khách hàng');
+            $('#conversationId').val(conversationId);
+
+            // Update avatar
+            const avatarHtml = userAvatar ?
+                `<img src="${userAvatar}" alt="Avatar" />` :
+                `<div class="avatar-placeholder">${userName.charAt(0).toUpperCase()}</div>`;
+            $('#chatAvatar').html(avatarHtml);
+
+            // Load messages
+            loadMessages(conversationId);
+
+            // Start polling for new messages
+            if (messagePollingInterval) {
+                clearInterval(messagePollingInterval);
+            }
+            messagePollingInterval = setInterval(function() {
+                checkForNewMessages();
+            }, 3000);
+        }
+
+        function loadMessages(conversationId) {
+            $('#loadingMessages').show();
+            $('#messagesContainer').empty().append($('#loadingMessages'));
+
+            $.ajax({
+                url: '@Url.Action("GetMessages", "Chat")',
+                method: 'GET',
+                data: { conversationId: conversationId },
+                success: function(response) {
+                    $('#loadingMessages').hide();
+                    if (response.success) {
+                        response.messages.forEach(function(message) {
+                            addMessageToChat(message);
+                            lastMessageId = Math.max(lastMessageId, message.messageId);
+                        });
+                        scrollToBottom();
+                    }
+                },
+                error: function() {
+                    $('#loadingMessages').hide();
+                    $('#messagesContainer').html('<div class="text-center text-danger">Lỗi khi tải tin nhắn</div>');
+                }
+            });
+        }
+
+        function sendMessage() {
+            const messageText = $('#messageInput').val().trim();
+            if (!messageText || !currentConversationId) return;
+
+            $('#sendButton').prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("SendMessage", "Chat")',
+                method: 'POST',
+                data: {
+                    conversationId: currentConversationId,
+                    messageText: messageText
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#messageInput').val('');
+                        addMessageToChat({
+                            messageId: response.messageId,
+                            senderId: '@ViewBag.CurrentUserId',
+                            messageText: response.messageText,
+                            timestamp: response.timestamp
+                        });
+                        lastMessageId = response.messageId;
+                        scrollToBottom();
+
+                        // Update conversation preview
+                        updateConversationPreview(currentConversationId, messageText, response.timestamp);
+                    } else {
+                        alert('Lỗi: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi gửi tin nhắn');
+                },
+                complete: function() {
+                    $('#sendButton').prop('disabled', false);
+                    $('#messageInput').focus();
+                }
+            });
+        }
+
+        function checkForNewMessages() {
+            if (!currentConversationId) return;
+
+            $.ajax({
+                url: '@Url.Action("GetNewMessages", "Chat")',
+                method: 'GET',
+                data: {
+                    conversationId: currentConversationId,
+                    lastMessageId: lastMessageId
+                },
+                success: function(response) {
+                    if (response.success && response.messages.length > 0) {
+                        response.messages.forEach(function(message) {
+                            addMessageToChat(message);
+                            lastMessageId = Math.max(lastMessageId, message.messageId);
+                        });
+                        scrollToBottom();
+                    }
+                }
+            });
+        }
+
+        function addMessageToChat(message) {
+            const currentUserId = '@ViewBag.CurrentUserId';
+            const isSent = message.senderId === currentUserId;
+
+            const messageHtml = `
+                <div class="message-item ${isSent ? 'sent' : 'received'}">
+                    <div class="message-bubble ${isSent ? 'sent' : 'received'}">
+                        <div class="message-text">${escapeHtml(message.messageText)}</div>
+                        <div class="message-time">${message.timestamp}</div>
+                    </div>
+                </div>
+            `;
+
+            $('#messagesContainer').append(messageHtml);
+        }
+
+        function updateConversationPreview(conversationId, messageText, timestamp) {
+            const conversationItem = $(`.conversation-item[data-conversation-id="${conversationId}"]`);
+            conversationItem.find('.message-text').text(messageText.length > 50 ? messageText.substring(0, 50) + '...' : messageText);
+            conversationItem.find('.conversation-time').text(timestamp.split(' ')[0]); // Only time part
+            conversationItem.find('.message-sender').text('Bạn: ');
+
+            // Move conversation to top
+            conversationItem.prependTo('.conversations-list');
+        }
+
+        function scrollToBottom() {
+            const container = $('#messagesContainer')[0];
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function refreshChat() {
+            if (currentConversationId) {
+                loadMessages(currentConversationId);
+            }
+        }
+
+        // Make refreshChat global
+        window.refreshChat = refreshChat;
+    });
+</script>

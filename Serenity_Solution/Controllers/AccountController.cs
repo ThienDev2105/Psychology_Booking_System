@@ -1,7 +1,6 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using EXE201.Commons.Data;
-using EXE201.Commons.Migrations;
 using EXE201.Commons.Models;
 using EXE201.Services.Interfaces;
 using Humanizer;
@@ -51,36 +50,46 @@ namespace Serenity_Solution.Controllers
             {
                 return View(model);
             }
-            Random rnd = new Random();
-            var NameDefault = "user_" + rnd.Next(1, 1000001);
-
-            var user = new User
+            try
             {
-                UserName = model.Email,
-                Email = model.Email,
-                Name = NameDefault,
-                Phone = model.Phone,
-                DateOfBirth = DateTime.Now,
-                Gender = model.Gender,
-                Address = model.Address,
-                ProfilePictureUrl = model.ProfilePictureUrl
-            };
+                Random rnd = new Random();
+                var NameDefault = "user_" + rnd.Next(1, 1000001);
 
-            var result = await _accountService.RegisterAsync(user, model.Password);
+                var user = new User
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    Name = NameDefault,
+                    Phone = model.Phone,
+                    DateOfBirth = DateTime.Now,
+                    Gender = model.Gender,
+                    Address = model.Address,
+                    ProfilePictureUrl = model.Gender == "Nam" 
+                        ? "/image/Logo/AvatarMale.jpg"
+                        : "/image/Logo/AvatarFemale.jpg",
+                };
 
-            if (result.Succeeded)
-            {               
-                TempData["SuccessMessage"] = "Registration successful! Please login.";
-                return RedirectToAction("Login");
+                var result = await _accountService.RegisterAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+                    return RedirectToAction("Login");
+                }
+
+                // Hiển thị lỗi nếu đăng ký thất bại
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                return View(model);
             }
-
-            // Hiển thị lỗi nếu đăng ký thất bại
-            foreach (var error in result.Errors)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", error.Description);
+                ModelState.AddModelError("", $"Unexpected error: {ex.Message}");
+                return View(model);
             }
-
-            return View(model);
         }
 
 
@@ -280,7 +289,7 @@ namespace Serenity_Solution.Controllers
                 FullName = customer.Name,
                 Name = customer.Name,
                 Email = customer.Email,
-                Phone = customer.PhoneNumber,
+                Phone = customer.Phone,
                 Address = customer.Address,
                 DateOfBirth = customer.DateOfBirth,
                 Gender = customer.Gender,
@@ -344,6 +353,7 @@ namespace Serenity_Solution.Controllers
 
             if (updateResult.Succeeded)
             {
+                TempData["SuccessInfo"] = "Thay đổi thông tin thành công.";
                 return RedirectToAction(nameof(CustomerProfile));
             }
 
@@ -610,7 +620,7 @@ namespace Serenity_Solution.Controllers
                     _context.Update(customer);
                     await _context.SaveChangesAsync();
 
-                    TempData["SuccessMessage"] = "Chứng chỉ đã được tải lên thành công.";
+                    TempData["SuccessUpdate"] = "Chứng chỉ đã được tải lên thành công.";
                     return RedirectToAction("CustomerProfile", new { id = model.CustomerId });
                 }
 

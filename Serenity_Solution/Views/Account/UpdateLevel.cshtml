@@ -1,15 +1,4 @@
-﻿@* @model CertificateUploadViewModel
-
-<form asp-action="UpdateLevel" method="post" enctype="multipart/form-data">
-    <input type="hidden" asp-for="CustomerId" />
-    <div class="form-group">
-        <label asp-for="CertificateFile"></label>
-        <input asp-for="CertificateFile" type="file" class="form-control" />
-        <span asp-validation-for="CertificateFile" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary mt-3">Nộp chứng chỉ</button>
-</form>
- *@
+﻿
 
  @model CertificateUploadViewModel
 

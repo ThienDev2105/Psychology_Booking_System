@@ -30,6 +30,8 @@ namespace EXE201.Commons.Data
         public virtual DbSet<PsychTest> PsychTests { get; set; }
         public virtual DbSet<Question> Questions { get; set; }
         public virtual DbSet<Contact> Contacts { get; set; }
+        public virtual DbSet<Conversation> Conversations { get; set; }
+        public virtual DbSet<Message> Messages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -59,64 +61,42 @@ namespace EXE201.Commons.Data
                 .WithMany(u => u.PsychologistAppointments)
                 .HasForeignKey(a => a.Psychologist_ID)
                 .OnDelete(DeleteBehavior.Restrict);
-            /*
-            modelBuilder.Entity<Psychologist>().HasData(
-                new Psychologist
-                {
-                    UserName = "Lê Văn Thắng",
-                    Email = "Thang123@gamil.com",
-                    Name = "Lê Văn Thắng",
-                    Phone = "123456789",
-                    Address = "HCM, Việt Nam",
-                    Degree = "~image/Degree/cunhantamly.jpg",
-                    Description = "Nhà tâm lý học có nhiều năm kinh nghiệm trong ngành.",
-                    Experience = "10 years",
-                    Price = 1000000,
-                    ProfilePictureUrl = "~image/Doctor/Van_Thang.png"
-                },
-                new Psychologist
-                {
-                    UserName = "Dung Lê",
-                    Email = "Dungle123@gamil.com",
-                    Name = "Dung Lê",
-                    Phone = "0987654321",
-                    Address = "Hà Nội, Việt Nam",
-                    Degree = "~image/Degree/cunhantamly.jpg",
-                    Description = "Chuyên gia tư vấn tâm lý hôn nhân và gia đình.",
-                    Experience = "7 years",
-                    Price = 850000,
-                    ProfilePictureUrl = "~image/Doctor/Dung_Le.png"
-                },
+            //them
+            modelBuilder.Entity<Conversation>()
+                .HasMany(c => c.Messages)
+                .WithOne(m => m.Conversation)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                new Psychologist
-                {
-                    UserName = "Hà Lê",
-                    Email = "HaLe123@gamil.com",
-                    Name = "Hà Lê",
-                    Phone = "0912345678",
-                    Address = "Đà Nẵng, Việt Nam",
-                    Degree = "~image/Degree/cunhantamly.jpg",
-                    Description = "Tiến sĩ tâm lý học, chuyên về điều trị trầm cảm và rối loạn lo âu.",
-                    Experience = "12 years",
-                    Price = 1200000,
-                    ProfilePictureUrl = "~image/Doctor/Ha_Le.png"
-                },
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                new Psychologist
-                {
-                    UserName = "Kim Nguyễn",
-                    Email = "KimNguyen123@gamil.com",
-                    Name = "Kim Nguyễn",
-                    Phone = "0933555777",
-                    Address = "Cần Thơ, Việt Nam",
-                    Degree = "~image/Degree/cunhantamly.jpg",
-                    Description = "Tư vấn tâm lý cho trẻ em và thanh thiếu niên.",
-                    Experience = "6 years",
-                    Price = 750000,
-                    ProfilePictureUrl = "~image/Doctor/Kim_Nguan.png"
-                }
-                
-            );  */
+            modelBuilder.Entity<Conversation>()
+                .HasOne(c => c.User1)
+                .WithMany()
+                .HasForeignKey(c => c.User1Id)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Conversation>()
+                .HasOne(c => c.User2)
+                .WithMany()
+                .HasForeignKey(c => c.User2Id)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Conversation>()
+                .HasOne(c => c.LastMessage)
+                .WithMany()
+                .HasForeignKey(c => c.LastMessageId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
     }

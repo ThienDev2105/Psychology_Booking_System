@@ -10,6 +10,7 @@ namespace Serenity_Solution.Seeders
             var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
             //them  
+            
             string[] roleNames = { "Admin", "Psychologist", "Customer" };
 
             foreach (var roleName in roleNames)
@@ -18,7 +19,7 @@ namespace Serenity_Solution.Seeders
                 {
                     await roleManager.CreateAsync(new ApplicationRole(roleName));
                 }
-            }
+            } 
             // Tìm hoặc tạo user Admin
             if (userManager.Users.All(u => u.Email != "admin@example.com"))
             {

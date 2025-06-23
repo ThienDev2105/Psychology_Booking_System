@@ -1,0 +1,238 @@
+﻿@using EXE201.Commons.Models
+@model Conversation
+@{
+    ViewData["Title"] = "Trò chuyện";
+    var currentUserId = ViewBag.CurrentUserId as string;
+    var otherUser = ViewBag.OtherUser as User;
+}
+
+<div class="container-fluid vh-100 d-flex flex-column">
+    <!-- Header -->
+    <div class="row bg-white border-bottom py-3 flex-shrink-0">
+        <div class="col-12">
+            <div class="d-flex align-items-center">
+                <a href="@Url.Action("Index", "Chat")" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="avatar me-3">
+                    @if (!string.IsNullOrEmpty(otherUser.ProfilePictureUrl))
+                    {
+                        <img src="@otherUser.ProfilePictureUrl" alt="Avatar"
+                             class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px; color: white; font-weight: bold; font-size: 14px;">
+                            @(otherUser.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")
+                        </div>
+                    }
+                </div>
+                <div>
+                    <h5 class="mb-0">@otherUser.Name</h5>
+                    <small class="text-muted">
+                        @if (!string.IsNullOrEmpty(otherUser.Degree))
+                        {
+                            <span>@otherUser.Degree</span>
+                        }
+                        else
+                        {
+                            <span>Khách hàng</span>
+                        }
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="row flex-grow-1 overflow-hidden">
+        <div class="col-12 h-100">
+            <div id="messagesContainer" class="h-100 overflow-auto p-3" style="background-color: #f8f9fa;">
+                @if (Model.Messages?.Any() == true)
+                {
+                    @foreach (var message in Model.Messages)
+                    {
+                        <div class="message-item mb-3 @(message.SenderId == currentUserId ? "text-end" : "text-start")"
+                             data-message-id="@message.MessageId">
+                            <div class="d-inline-block max-width-70">
+                                @if (message.SenderId == currentUserId)
+                                {
+                                    <!-- Tin nhắn của mình -->
+                                    <div class="bg-primary text-white rounded px-3 py-2 d-inline-block">
+                                        @message.MessageText
+                                    </div>
+                                }
+                                else
+                                {
+                                    <!-- Tin nhắn của người khác -->
+                                    <div class="bg-white border rounded px-3 py-2 d-inline-block">
+                                        @message.MessageText
+                                    </div>
+                                }
+                                <div class="small text-muted mt-1">
+                                    @message.Timestamp.ToString("HH:mm dd/MM/yyyy")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-muted mt-5">
+                        <i class="fas fa-comments fa-2x mb-3"></i>
+                        <p>Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="row bg-white border-top py-3 flex-shrink-0">
+        <div class="col-12">
+            <form id="messageForm" class="d-flex">
+                <input type="hidden" id="conversationId" value="@Model.ConversationId" />
+                <input type="text" id="messageInput" class="form-control me-2"
+                       placeholder="Nhập tin nhắn..." maxlength="1000" />
+                <button type="submit" class="btn btn-primary" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .max-width-70 {
+        max-width: 70%;
+    }
+
+    #messagesContainer {
+        scroll-behavior: smooth;
+    }
+
+    .message-item {
+        word-wrap: break-word;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let lastMessageId = @(Model.Messages?.LastOrDefault()?.MessageId ?? 0);
+
+        // Scroll to bottom on load
+        scrollToBottom();
+
+        // Handle form submission
+        $('#messageForm').on('submit', function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+
+        // Handle Enter key
+        $('#messageInput').on('keypress', function(e) {
+            if (e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Poll for new messages every 3 seconds
+        setInterval(function() {
+            checkForNewMessages();
+        }, 3000);
+
+        function sendMessage() {
+            const messageText = $('#messageInput').val().trim();
+            if (!messageText) return;
+
+            const conversationId = $('#conversationId').val();
+            $('#sendButton').prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("SendMessage", "Chat")',
+                method: 'POST',
+                data: {
+                    conversationId: conversationId,
+                    messageText: messageText
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#messageInput').val('');
+                        addMessageToChat(response, true);
+                        lastMessageId = response.messageId;
+                        scrollToBottom();
+                    } else {
+                        alert('Lỗi: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi gửi tin nhắn');
+                },
+                complete: function() {
+                    $('#sendButton').prop('disabled', false);
+                    $('#messageInput').focus();
+                }
+            });
+        }
+
+        function checkForNewMessages() {
+            const conversationId = $('#conversationId').val();
+
+            $.ajax({
+                url: '@Url.Action("GetNewMessages", "Chat")',
+                method: 'GET',
+                data: {
+                    conversationId: conversationId,
+                    lastMessageId: lastMessageId
+                },
+                success: function(response) {
+                    if (response.success && response.messages.length > 0) {
+                        response.messages.forEach(function(message) {
+                            addMessageToChat(message, false);
+                            lastMessageId = Math.max(lastMessageId, message.messageId);
+                        });
+                        scrollToBottom();
+                    }
+                }
+            });
+        }
+
+        function addMessageToChat(message, isSent) {
+            const currentUserId = '@currentUserId';
+            const isCurrentUser = message.senderId === currentUserId || isSent;
+
+            const messageHtml = `
+                <div class="message-item mb-3 ${isCurrentUser ? 'text-end' : 'text-start'}" data-message-id="${message.messageId}">
+                    <div class="d-inline-block max-width-70">
+                        ${isCurrentUser ?
+                            `<div class="bg-primary text-white rounded px-3 py-2 d-inline-block">${escapeHtml(message.messageText)}</div>` :
+                            `<div class="bg-white border rounded px-3 py-2 d-inline-block">${escapeHtml(message.messageText)}</div>`
+                        }
+                        <div class="small text-muted mt-1">${message.timestamp}</div>
+                    </div>
+                </div>
+            `;
+
+            $('#messagesContainer').append(messageHtml);
+        }
+
+        function scrollToBottom() {
+            const container = $('#messagesContainer')[0];
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    });
+</script>
