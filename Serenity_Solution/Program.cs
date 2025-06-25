@@ -18,17 +18,11 @@ using Serenity_Solution.Unity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Sử dụng MySQL thay vì SQL Server
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 28));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion)
-        .LogTo(Console.WriteLine, LogLevel.Information)
-        .EnableSensitiveDataLogging()
-        .EnableDetailedErrors());
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 //add service and repository

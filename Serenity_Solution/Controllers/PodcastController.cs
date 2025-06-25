@@ -279,9 +279,7 @@ namespace Serenity_Solution.Controllers
         public IActionResult Detail(int id = 1)
         {
             var podcast = _podcasts.FirstOrDefault(p => p.Id == id) ?? _podcasts.First();
-<<<<<<< Updated upstream
-            
-=======
+
 
             // Get comments for this podcast
             var comments = _comments.Where(c => c.PodcastID == id).OrderByDescending(c => c.DateComment).ToList();
@@ -292,7 +290,6 @@ namespace Serenity_Solution.Controllers
             // Calculate average rating
             var averageRating = ratings.Any() ? ratings.Average(r => r.Stars) : 0;
             var ratingCount = ratings.Count;
->>>>>>> Stashed changes
 
             // Get related podcasts (same category but different ID)
             var relatedPodcasts = _podcasts
