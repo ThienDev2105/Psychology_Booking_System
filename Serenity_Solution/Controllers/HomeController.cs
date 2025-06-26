@@ -77,17 +77,18 @@ namespace Serenity_Solution.Controllers
                 var viewModelC = new CombinedViewModel
                 {
                     Doctors = doctors,
-                    Podcast = new PodcastViewModel
-                    {
-                        // Nếu bạn muốn hiển thị một podcast cụ thể, hãy khởi tạo dữ liệu ở đây
-                        // Ví dụ:
-                        Title = "Life Update: Cuộc sống của mình sau pobcast",
-                        ImageUrl = "/image/Podcast/ThePresent2.png",
-                        AudioUrl = "/audio/podcast-audio.mp3",
-                        Rating = 4.6,
-                        RatingCount = 205,
-                        Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn, nhưng chúng ta có thể học hỏi từ kinh nghiệm của người khác. Podcast này tập hợp những lời khuyên và hướng dẫn quý giá cho cuộc sống."
-                    },
+                    Podcast = new List<PodcastViewModel>
+{
+    new PodcastViewModel
+    {
+        Title = "Life Update: Cuộc sống của mình sau pobcast",
+        ImageUrl = "/image/Podcast/ThePresent2.png",
+        AudioUrl = "/Audio/LifeUpdate.mp3",
+        Rating = 4.6,
+        RatingCount = 205,
+        Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn..."
+    }
+},
                     Contact = new Contact(),
 
                     currentUser = CurrentUser.Id
@@ -98,17 +99,18 @@ namespace Serenity_Solution.Controllers
                 var viewModel = new CombinedViewModel
                 {
                 Doctors = doctors,
-                    Podcast = new PodcastViewModel
-                    {
-                        // Nếu bạn muốn hiển thị một podcast cụ thể, hãy khởi tạo dữ liệu ở đây
-                        // Ví dụ:
-                        Title = "Life Update: Cuộc sống của mình sau pobcast",
-                        ImageUrl = "/image/Podcast/ThePresent2.png",
-                        AudioUrl = "/audio/podcast-audio.mp3",
-                        Rating = 4.6,
-                        RatingCount = 205,
-                        Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn, nhưng chúng ta có thể học hỏi từ kinh nghiệm của người khác. Podcast này tập hợp những lời khuyên và hướng dẫn quý giá cho cuộc sống."
-                    },
+                    Podcast = new List<PodcastViewModel>
+{
+    new PodcastViewModel
+    {
+        Title = "Life Update: Cuộc sống của mình sau pobcast",
+        ImageUrl = "/image/Podcast/ThePresent2.png",
+        AudioUrl = "/audio/LifeUpdate.mp3",
+        Rating = 4.6,
+        RatingCount = 205,
+        Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn..."
+    }
+},
                 Contact = new Contact(),
               
                 //currentUser = CurrentUser.Id
