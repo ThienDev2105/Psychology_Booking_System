@@ -29,7 +29,7 @@ namespace Serenity_Solution.Controllers
                 Id = 2,
                 Title = "Bí quyết giúp con KHÔNG CÒN NHÚT NHÁT khi còn đi học",
                 Description = "Xem phiên bản video:https://youtu.be/FY4qi0IUDtk?si=OFGhT-YXcrAOmpMY\r\n\r\nNhi Le Podcast cảm ơn bạn đã dành thời gian lắng nghe\r\n\r\n\r\nTheo dõi Fanpage tại https://www.facebook.com/AnneNhiLe và\r\n\r\n\r\nSubscribe kênh Youtube NHI LE https://www.youtube.com/@NHILE_SG để xem và cập nhật các kiến thức mới mỗi ngày",
-                ImageUrl = "image/Podcast/NhiLe.png",
+                ImageUrl = "/image/Podcast/NhiLe.png",
                 AudioUrl = "/Audio/BiQuyetGiupCon.mp3",
                 Author = "Nhi Lê",
                 Duration = "11:38",
