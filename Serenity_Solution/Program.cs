@@ -107,7 +107,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         await IdentitySeeder.SeedRolesAndAdminAsync(serviceProvider);
-        await IdentitySeeder.SeedDataPsychologist(serviceProvider); // them
+        //await IdentitySeeder.SeedDataPsychologist(serviceProvider); // them
     }
     catch (Exception ex)
     {

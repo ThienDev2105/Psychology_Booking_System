@@ -43,69 +43,13 @@
     </div>
 
 
-    <div class="doctor-list">
-        @if (Model != null && Model.Any())
-        {
-            @foreach (var doctor in Model)
-            {
-                <div class="doctor-card">
-                    <div class="doctor-info">
-                        <!-- Default avatar if no image available -->
-                        <img src="@doctor.ProfilePictureUrl" alt="@doctor.Name" class="doctor-avatar" />
-                        <div class="doctor-details">
-                            <h3 class="doctor-name">@doctor.Name</h3>
-                            <p class="doctor-specialty">@doctor.Major</p>
-                            <p class="doctor-location">📍@(string.IsNullOrEmpty(doctor.Address) ? "Chưa cập nhật địa chỉ" : doctor.Address)</p>
-                            <p class="doctor-experience">🗓️ @Html.Raw((doctor.Experience ?? "Chưa cập nhật kinh nghiệm").Replace("\n", "<br/>"))</p>
-                            @if (doctor.Description != null)
-                            {
-                                <p class="doctor-description">📝 @doctor.Description</p>
-                            }
-                            <p class="doctor-price">👥 Chi phí tư vấn: <strong>@(doctor.Price.ToString("N0") ?? "0") VND</strong></p>
-                        </div>
-                    </div>
-                    <form asp-controller="Doctor" asp-action="Detail">
-                        <input type="hidden" name="Id" value="@doctor.Id" />
-                    <button class="contact-button" >Liên hệ ngay</button>
-                    </form>
-                    @*onclick="contactDoctor('@doctor.Id')"*@
-                </div>
-            }
-        }
-        else
-        {
-            <div class="no-doctors">
-                <p>Hiện tại không có bác sĩ nào khả dụng.</p>
-            </div>
-        }
+    <div id="doctorContainer">
+        @Html.Partial("_DoctorListPartial", Model)
     </div>
 
-    <!-- Pagination -->
-    @if (ViewBag.TotalPages > 1)
-    {
-        <div class="pagination">
-            @if (ViewBag.CurrentPage > 1)
-            {
-                <a asp-action="Index" asp-route-page="1" asp-route-search="@ViewBag.CurrentSearch" class="page-link">« First</a>
-                <a asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)" asp-route-search="@ViewBag.CurrentSearch" class="page-link">« Back</a>
-            }
+    
 
-            @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
-            {
-                <a asp-action="Index" asp-route-page="@i" asp-route-search="@ViewBag.CurrentSearch"
-                   class="page-link @(i == ViewBag.CurrentPage ? "active" : "")">@i</a>
-            }
 
-            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-            {
-                <a asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)" asp-route-search="@ViewBag.CurrentSearch" class="page-link">Next »</a>
-                <a asp-action="Index" asp-route-page="@ViewBag.TotalPages" asp-route-search="@ViewBag.CurrentSearch" class="page-link">Last »</a>
-            }
-        </div>
-        <div class="page-info">
-            Page @ViewBag.CurrentPage of @ViewBag.TotalPages
-        </div>
-    }
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -115,6 +59,22 @@
         e.preventDefault();
         window.location.href = '/Home/Index#contact';
     });
+</script>
+<script>
+    function loadDoctors(page) {
+    const search = document.querySelector('input[name="searchString"]').value;
+    const filter = document.querySelector('select[name="filterType"]').value;
+
+        fetch(`/Doctor/GetDoctorList?searchString=${search}&filterType=${filter}&page=${page}`)
+        .then(response => response.text())
+        .then(html => {
+            console.log(html); // <-- kiểm tra output
+            document.getElementById("doctorContainer").innerHTML = html;
+            document.getElementById("doctorContainer").scrollIntoView({ behavior: 'smooth' });
+        });
+
+}
+
 </script>
 
 <style>
@@ -296,35 +256,5 @@
         color: #666;
         font-size: 1.1rem;
     }
-
-    .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 0.5rem;
-        margin-top: 2rem;
-    }
-
-    .pagination-btn {
-        padding: 0.75rem 1rem;
-        border: 1px solid #e0e0e0;
-        background: white;
-        cursor: pointer;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        color: #333;
-        display: inline-block;
-    }
-
-        .pagination-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .pagination-btn:hover:not(.active) {
-            background: #f8f9fa;
-            border-color: #667eea;
-        }    
 </style>
 

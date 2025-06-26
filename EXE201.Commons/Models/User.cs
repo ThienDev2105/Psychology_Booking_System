@@ -23,6 +23,8 @@ namespace EXE201.Commons.Models
         public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; } = "Unspecified"; // Male, Female, Other
         public string? CertificateUrl { get; set; }
+        public bool HasPaidDASS21Test { get; set; } = false;
+
         [NotMapped]
         public bool? DoctorCertificateUrl { get; set; } = false; // Indicates if the user has a doctor certificate
 

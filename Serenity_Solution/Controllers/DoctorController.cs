@@ -34,32 +34,47 @@ namespace Serenity_Solution.Controllers
             _context = context;
             _vpnPayServicecs = vnPayServicecs;
         }
-        public async Task<IActionResult> Index(string searchString, string filterType, int page = 1, int pageSize = 1)
+        public async Task<IActionResult> Index(string searchString, string filterType, int page = 1, int pageSize = 2)
+        {
+            var doctors = await LoadDoctors(searchString, filterType);
+
+            int total = doctors.Count;
+            var pagedDoctors = doctors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
+            ViewBag.CurrentPage = page;
+            ViewBag.SearchString = searchString;
+            ViewBag.FilterType = filterType;
+
+            return View(pagedDoctors); // Trả về Index.cshtml đầy đủ
+        }
+
+
+        private async Task<List<PsychologistViewModel>> LoadDoctors(string searchString, string filterType)
         {
             var users = await _userManager.GetUsersInRoleAsync("Psychologist");
-            var doctors = users.OfType<User>() // Lọc ra danh sách Customer
-                .Where(c => c.CertificateUrl != null && c.Price > 0) // Lọc ra những người có yêu cầu nâng cấp
+            var doctors = users.OfType<User>()
+                .Where(c => c.CertificateUrl != null && c.ProfilePictureUrl != null && c.Price > 0)
                 .ToList();
 
-            if(!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 doctors = doctors.Where(d => d.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
                                              d.Major.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            // Lọc theo loại bác sĩ dựa trên filterType
             if (!string.IsNullOrEmpty(filterType))
             {
                 switch (filterType)
                 {
                     case "psychiatrist":
-                        doctors = doctors.Where(d => d.Major != null && d.Major.Contains("Bác sĩ tâm thần", StringComparison.OrdinalIgnoreCase)).ToList();
+                        doctors = doctors.Where(d => d.Major?.Contains("Bác sĩ tâm thần", StringComparison.OrdinalIgnoreCase) == true).ToList();
                         break;
                     case "clinicalPsychologist":
-                        doctors = doctors.Where(d => d.Major != null && d.Major.Contains("Nhà tâm lý học lâm sàng", StringComparison.OrdinalIgnoreCase)).ToList();
+                        doctors = doctors.Where(d => d.Major?.Contains("Nhà tâm lý học lâm sàng", StringComparison.OrdinalIgnoreCase) == true).ToList();
                         break;
                     case "counselor":
-                        doctors = doctors.Where(d => d.Major != null && d.Major.Contains("Tư vấn viên tâm lý", StringComparison.OrdinalIgnoreCase)).ToList();
+                        doctors = doctors.Where(d => d.Major?.Contains("Tư vấn viên tâm lý", StringComparison.OrdinalIgnoreCase) == true).ToList();
                         break;
                     case "experience":
                         doctors = doctors.OrderByDescending(d => d.Experience).ToList();
@@ -67,43 +82,37 @@ namespace Serenity_Solution.Controllers
                     case "priceAsc":
                         doctors = doctors.OrderBy(d => d.Price).ToList();
                         break;
-                    default:
-                        break;
                 }
             }
 
-
-            if (doctors.Count == 0)
+            return doctors.Select(d => new PsychologistViewModel
             {
-                TempData["NoWSDetail"] = true;
-            }
-            var DoctorList = doctors
-                 .Select(s => new PsychologistViewModel
-                 {
-                     Id = s.Id,
-                     Name = s.Name,
-                     Address = s.Address,
-                     Price = s.Price,
-                     Description = s.Description,
-                     Experience = s.Experience,
-                     Major = s.Major ?? "Chưa cập nhật",
-                     ProfilePictureUrl = s.ProfilePictureUrl,                  
-                 })
-                 .ToList();
-            int totalUsers = DoctorList.Count();
-            var pagedUsers = DoctorList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
-            ViewBag.CurrentPage = page;
-            // Gửi danh sách Staff kèm ID (dùng ViewBag nếu cần)
-            ViewBag.SearchString = searchString;
-
-            
-
-            return View(pagedUsers);
-
-
+                Id = d.Id,
+                Name = d.Name,
+                Address = d.Address,
+                Price = d.Price,
+                Description = d.Description,
+                Experience = d.Experience,
+                Major = d.Major,
+                ProfilePictureUrl = d.ProfilePictureUrl
+            }).ToList();
         }
+        public async Task<IActionResult> GetDoctorList(string searchString, string filterType, int page = 1, int pageSize = 2)
+        {
+            var doctors = await LoadDoctors(searchString, filterType);
+
+            int total = doctors.Count;
+            var pagedDoctors = doctors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
+            ViewBag.CurrentPage = page;
+            ViewBag.SearchString = searchString;
+            ViewBag.FilterType = filterType;
+
+            return PartialView("_DoctorListPartial", pagedDoctors);
+        }
+
+
         public async Task<IActionResult> Detail(string Id)
         {
             var user = await _userManager.FindByIdAsync(Id);

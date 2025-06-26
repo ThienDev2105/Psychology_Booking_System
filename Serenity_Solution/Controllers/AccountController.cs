@@ -698,9 +698,23 @@ namespace Serenity_Solution.Controllers
             }
 
             appointment.Status = "Canceled";
-            
 
+            // 2. delete conversation
+            var clientBooked = appointment.Client;
+            var currentUser = await _userManager.GetUserAsync(User);
             
+            var existingConversation = await _context.Conversations
+            .FirstOrDefaultAsync(c =>
+                (c.User1Id == currentUser.Id && c.User2Id == clientBooked.Id) ||
+                (c.User1Id == clientBooked.Id && c.User2Id == currentUser.Id));
+
+            if (existingConversation != null)
+            {
+                // 3. Nếu chưa có -> Tạo Conversation mới
+                _context.Conversations.Remove(existingConversation);
+                await _context.SaveChangesAsync();
+            }
+
             if (User.IsInRole("Psychologist"))
             {
                 // Gửi email thông báo cho khách hàng

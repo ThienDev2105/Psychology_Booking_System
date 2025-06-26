@@ -12,5 +12,9 @@ namespace EXE201.Services.Interfaces
     {
         string CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model);
         VnPaymentResponseModel PaymentExecute(IQueryCollection collections);
+
+        string CreateTestPaymentUrl(HttpContext context, TestPaymentRequest model);
+        TestPaymentRespone TestPaymentExecute(IQueryCollection collections);
+
     }
 }

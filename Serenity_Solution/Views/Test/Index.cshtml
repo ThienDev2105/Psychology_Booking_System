@@ -1,6 +1,7 @@
 ﻿@{
 
     ViewData["Title"] = "Kiểm tra tâm lý";
+    var hasPaid = (bool)(ViewData["HasPaidDASS21Test"] ?? false);
 }
 
 <link rel="stylesheet" href="~/css/test.css" />
@@ -47,10 +48,156 @@
         </div>
 
         <div class="test-start-section">
-            <a href="/Test/DASS21" class="test-start-btn">BẮT ĐẦU</a>
+            <!-- Button thanh toán (hiển thị mặc định) -->
+            <button id="paymentBtn" class="payment-btn">
+                <span class="btn-text">29.000 VNĐ</span>
+                <span class="btn-spinner" style="display:none;"></span>
+            </button>
+            <p id="paymentNote" class="payment-note">Thanh toán để bắt đầu</p>
+
+            <!-- Button bắt đầu (ẩn mặc định, hiển thị sau khi thanh toán thành công) -->
+            <a href="/Test/DASS21" id="startBtn" class="test-start-btn" style="display: none;">BẮT ĐẦU</a>
+
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                <div class="spinner"></div>
+                <p>Đang xử lý thanh toán...</p>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Toast notification -->
+<div id="toastNotification" class="toast-notification">
+    <div class="toast-content">
+        <i class="toast-icon">✓</i>
+        <span class="toast-message">Đã thanh toán thành công</span>
+    </div>
+</div>
+
+
+<script>
+    const isAuthenticated = @(User.Identity.IsAuthenticated.ToString().ToLower());
+    const hasSuccessMessage = @((TempData["Testsuccess"] != null).ToString().ToLower());
+    const hasErrorMessage = @((TempData["Testerror"] != null).ToString().ToLower());
+    const hasPaid = "@(ViewData["HasPaidDASS21Test"] != null && (bool)ViewData["HasPaidDASS21Test"] ? "true" : "false")";
+
+    if (hasPaid === "true") {
+        showSuccessState();
+        if (hasSuccessMessage) showToast(); // chỉ toast khi mới thanh toán
+    } else if (hasSuccessMessage) {
+        showSuccessState();
+        showToast(); // backup: TH có success nhưng chưa update trạng thái hasPaid
+    }
+
+
+
+
+    // Show error toast if payment failed
+    if (hasErrorMessage) {
+        showToast("@TempData["Testerror"]", "error");
+    }
+
+    // Handle payment button click
+    document.getElementById('paymentBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Check authentication
+        if (!isAuthenticated) {
+            alert('Vui lòng đăng nhập trước khi thực hiện hành động này!');
+            window.location.href = '/Account/Login';
+            return;
+        }
+
+        // Show loading state
+        const btn = this;
+        const textSpan = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.btn-spinner');
+
+        // Disable button and show spinner
+        btn.disabled = true;
+        textSpan.style.display = 'none';
+        spinner.style.display = 'inline-block';
+
+        // Delay 5 seconds then call payment
+        setTimeout(() => {
+            makePaymentRequest();
+        }, 3000);
+
+    });
+
+    function makePaymentRequest() {
+        fetch('/Test/Payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({
+                TestType: 'DASS21'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.redirectUrl) {
+                // Redirect to VNPay
+                window.location.href = data.redirectUrl;
+            } else {
+                throw new Error(data.message || 'Payment request failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoadingState();
+            showToast(error.message || 'Có lỗi xảy ra khi xử lý thanh toán', 'error');
+        });
+    }
+
+    function showLoadingState() {
+        document.getElementById('paymentBtn').style.display = 'none';
+        document.getElementById('paymentNote').style.display = 'none';
+        document.getElementById('loadingIndicator').style.display = 'block';
+    }
+
+    function hideLoadingState() {
+        document.getElementById('paymentBtn').style.display = 'inline-block';
+        document.getElementById('paymentNote').style.display = 'block';
+        document.getElementById('loadingIndicator').style.display = 'none';
+    }
+
+    function showSuccessState() {
+        document.getElementById('paymentBtn').style.display = 'none';
+        document.getElementById('paymentNote').style.display = 'none';
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('startBtn').style.display = 'inline-block';
+
+        // Cuộn xuống vị trí nút BẮT ĐẦU
+        document.getElementById('startBtn').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showToast(message = 'Đã thanh toán thành công', type = 'success') {
+        const toast = document.getElementById('toastNotification');
+        const messageElement = toast.querySelector('.toast-message');
+        const iconElement = toast.querySelector('.toast-icon');
+
+        messageElement.textContent = message;
+
+        if (type === 'error') {
+            toast.classList.add('toast-error');
+            iconElement.textContent = '✕';
+        } else {
+            toast.classList.remove('toast-error');
+            iconElement.textContent = '✓';
+        }
+
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+</script>
+
 
 <style>
     body {
@@ -94,11 +241,9 @@
         margin-bottom: 5px;
     }
 
-
     .stat-desc {
         color: #555;
     }
-
 
     .stat-time {
         font-size: 1.5rem;
@@ -143,10 +288,34 @@
             margin-bottom: 5px;
         }
 
-
     .test-start-section {
         text-align: center;
         margin-top: 30px;
+    }
+
+    .payment-btn {
+        background: linear-gradient(45deg, #4e54c8, #8f94fb);
+        color: white;
+        font-weight: bold;
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
+        min-width: 200px;
+    }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 84, 200, 0.4);
+        }
+
+    .payment-note {
+        margin-top: 10px;
+        color: #666;
+        font-size: 0.9rem;
     }
 
     .test-start-btn {
@@ -154,12 +323,13 @@
         background-color: #ff9800;
         color: white;
         font-weight: bold;
-        padding: 12px 50px;
+        padding: 15px 50px;
         font-size: 1.2rem;
         border-radius: 30px;
         text-decoration: none;
-        transition: background-color 0.3s;
-        box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        min-width: 200px;
     }
 
         .test-start-btn:hover {
@@ -167,22 +337,124 @@
             transform: translateY(-2px);
             color: white;
             text-decoration: none;
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
         }
 
+    .loading-indicator {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4e54c8;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .loading-indicator p {
+        color: #666;
+        margin: 0;
+    }
+
+    /* Toast Notification Styles */
+    .toast-notification {
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        min-width: 300px;
+    }
+
+        .toast-notification.show {
+            display: flex;
+            transform: translateX(0);
+        }
+
+        .toast-notification.toast-error {
+            background: #f44336;
+        }
+
+    .toast-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toast-icon {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .toast-message {
+        flex: 1;
+        font-weight: 500;
+    }
 
     @@media (max-width: 768px) {
-        .test-stats {
-            flex-direction: column;
-            gap: 15px;
-        }
+        .test-stats
 
-        .test-intro-container {
-            padding: 20px;
-        }
-
-
-        .stat-number, .stat-time {
-            font-size: 1.8rem;
-        }
+    {
+        flex-direction: column;
+        gap: 15px;
     }
-</style> 
+
+    .test-intro-container {
+        padding: 20px;
+    }
+
+    .stat-number, .stat-time {
+        font-size: 1.8rem;
+    }
+
+    .toast-notification {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        transform: translateY(-100px);
+    }
+
+        .toast-notification.show {
+            transform: translateY(0);
+        }
+
+    }
+
+    .btn-spinner {
+        border: 3px solid #fff;
+        border-top: 3px solid #8f94fb;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 10px;
+    }
+
+</style>
