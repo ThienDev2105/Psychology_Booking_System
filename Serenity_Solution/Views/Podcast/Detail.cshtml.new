@@ -1,0 +1,824 @@
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model Serenity_Solution.Models.PodcastViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Model.Title - Serenity Solution</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="~/image/Logo/LogoSere.jpg" alt="Logo">
+                <span><strong>Serenity</strong> Solution</span>
+            </div>
+            <nav class="main-nav">
+                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                <a asp-controller="Podcast" asp-action="Index" class="active">Podcast</a>
+                <a class="nav-link text-dark" asp-controller="Test" asp-action="Index">Kiểm tra tâm lý</a>
+                <a class="nav-link text-dark" asp-controller="Doctor" asp-action="Index">Danh sách bác sĩ</a>
+            </nav>
+            <div class="auth-buttons">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="dropdown">
+                        <button class="dropdown-toggle" onclick="toggleDropdown()">
+                            <i class="fas fa-user-circle"></i> Hello, @User.Identity.Name
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdown">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="AdminDashboard" asp-action="ManageUser" class="dropdown-item">Dashboard</a>
+                            }
+                            else if (User.IsInRole("Psychologist"))
+                            {
+                                <a asp-controller="Account" asp-action="PsychologistProfile" class="dropdown-item">Profile</a>
+                            }
+                            else if (User.IsInRole("Customer"))
+                            {
+                                <a asp-controller="Account" asp-action="CustomerProfile" class="dropdown-item">Profile</a>
+                            }
+                            <div class="dropdown-divider"></div>
+                            <a asp-controller="Account" asp-action="Logout" class="dropdown-item">Logout</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="login-link">Đăng Nhập</a>
+                    <a asp-controller="Account" asp-action="Register" class="signup-btn">Đăng Ký</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <div class="podcast-detail-container">
+        <div class="podcast-player">
+            <div class="podcast-info">
+                <img src="@Model.ImageUrl" alt="@Model.Title" class="podcast-image">
+                <div class="podcast-text">
+                    <div class="tag">@Model.Category</div>
+                    <h1 class="podcast-title">@Model.Title</h1>
+                    <p class="podcast-author">@Model.Author</p>
+                    <p class="podcast-duration"><i class="far fa-clock"></i> @Model.Duration</p>
+                </div>
+            </div>
+
+            <div class="audio-player">
+                <audio id="audio-element" src="@Model.AudioUrl"></audio>
+                
+                <div class="controls">
+                    <button class="btn-backward" id="backward-10">
+                        <i class="fas fa-undo-alt"></i>
+                        <span>10s</span>
+                    </button>
+                    
+                    <button class="btn-play" id="btn-play-pause">
+                        <i class="fas fa-play" id="play-icon"></i>
+                    </button>
+                    
+                    <button class="btn-forward" id="forward-10">
+                        <i class="fas fa-redo-alt"></i>
+                        <span>10s</span>
+                    </button>
+                </div>
+                
+                <div class="progress-container">
+                    <span id="current-time">00:00</span>
+                    <div class="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                    <span id="duration">00:00</span>
+                </div>
+                
+                <div class="volume-container">
+                    <i class="fas fa-volume-up" id="volume-icon"></i>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+                </div>
+            </div>
+            
+            <div class="podcast-description">
+                <h2>Mô tả</h2>
+                <p>@Model.Description</p>
+            </div>
+        </div>
+
+        <div class="related-podcasts">
+            <h2>Podcast liên quan</h2>
+            <div class="related-list">
+                @foreach (var podcast in ViewBag.RelatedPodcasts)
+                {
+                    <a href="@Url.Action("Detail", "Podcast", new { id = podcast.Id })" class="related-item">
+                        <img src="@podcast.ImageUrl" alt="@podcast.Title">
+                        <div class="related-info">
+                            <h3>@podcast.Title</h3>
+                            <p>@podcast.Author • @podcast.Duration</p>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-column-1">
+                <h2 class="logo"><span>Serenity</span> <strong>Solution</strong></h2>
+                <p>
+                    Chăm sóc sức khỏe tâm thần đề cập đến những nỗ lực mà các chuyên gia y tế thực hiện để phục hồi sức khỏe thể chất và tinh thần của chúng ta. Thuật ngữ này cũng bao gồm việc cung cấp các dịch vụ để duy trì sức khỏe cảm xúc.
+                </p>
+            </div>
+            <div class="footer-column">
+                <h3>Overview</h3>
+                <ul>
+                    <li><a href="#">BookShop</a></li>
+                    <li><a href="#">Podcast and Music</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About us</a></li>
+                    <li><a href="#">Services</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Explore</h3>
+                <ul>
+                    <li><a href="#">Blogs & Feeds</a></li>
+                    <li><a href="#">Privacy Police</a></li>
+                    <li><a href="#">Cookies</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Social Media</h3>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/" target="_blank" title="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.instagram.com/" target="_blank" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.twitter.com/" target="_blank" title="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+        <div class="copyright">
+            Copyright Serenity Solution 2025
+        </div>
+    </footer>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: #f7f7f7;
+            color: #333;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9fbfc;
+        }
+
+        .site-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .header-container {
+            width: 90%;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .logo span {
+            font-size: 20px;
+            color: #1e3a8a;
+        }
+
+        .logo span strong {
+            color: #1e40af; /* Darker blue for "Serenity" */
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .main-nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 10px 0;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .main-nav a:hover, .main-nav a.active {
+            color: #0f5e72;
+        }
+
+        .main-nav a.active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: #0f5e72;
+            bottom: 0;
+            left: 0;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .login-link {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .login-link:hover {
+            color: #0f5e72;
+        }
+
+        .signup-btn {
+            background-color: #0f5e72;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .signup-btn:hover {
+            background-color: #094154;
+        }
+
+        .podcast-detail-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        @@media (min-width: 992px) {
+            .podcast-detail-container {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .podcast-player {
+            background-color: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .podcast-info {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .podcast-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .podcast-text {
+            flex: 1;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: #e0f2fe;
+            color: #0f5e72;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .podcast-title {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .podcast-author {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .podcast-duration {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .audio-player {
+            background-color: #f1f5f9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .btn-play {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #0f5e72;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-play:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-play i {
+            font-size: 20px;
+        }
+
+        .btn-backward, .btn-forward {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .btn-backward i, .btn-forward i {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .btn-backward span, .btn-forward span {
+            font-size: 12px;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        #current-time, #duration {
+            font-size: 14px;
+            color: #64748b;
+            min-width: 40px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #cbd5e1;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress {
+            position: absolute;
+            height: 100%;
+            background-color: #0f5e72;
+            border-radius: 3px;
+            width: 0%;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #64748b;
+        }
+
+        #volume-slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #cbd5e1;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #0f5e72;
+            cursor: pointer;
+        }
+
+        .podcast-description {
+            margin-top: 32px;
+        }
+
+        .podcast-description h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #0f172a;
+        }
+
+        .podcast-description p {
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .related-podcasts {
+            background-color: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .related-podcasts h2 {
+            font-size: 20px;
+            margin-bottom: 24px;
+            color: #0f172a;
+        }
+
+        .related-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .related-item {
+            display: flex;
+            gap: 16px;
+            text-decoration: none;
+            color: inherit;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .related-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .related-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .related-info {
+            flex: 1;
+        }
+
+        .related-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: #0f172a;
+            line-height: 1.3;
+        }
+
+        .related-info p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .footer {
+            background-color: #f1f5f9;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .footer-column-1 {
+            flex-basis: 100%;
+            margin-bottom: 20px;
+        }
+
+        @@media (min-width: 992px) {
+            .footer-column-1 {
+                flex-basis: 40%;
+                margin-bottom: 0;
+            }
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            color: #3e7c7f;
+            margin-bottom: 10px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column ul li a {
+            text-decoration: none;
+            color: #111;
+            font-weight: 500;
+        }
+
+        .footer-column p {
+            font-size: 14px;
+            color: #222;
+            line-height: 1.5;
+        }
+
+        .social-icons a {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #111;
+            text-decoration: none;
+        }
+
+        hr {
+            margin: 30px 0 15px;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+
+        .copyright {
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+        }
+
+        /* Responsive Styles */
+        @@media (max-width: 768px) {
+            .podcast-info {
+                flex-direction: column;
+            }
+
+            .podcast-image {
+                width: 100%;
+                max-width: 200px;
+                margin: 0 auto 20px;
+            }
+
+            .controls {
+                gap: 16px;
+            }
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #1e3a8a;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 10px 16px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 6px 0;
+        }
+    </style>
+
+    <script>
+        // Dropdown toggle
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown-toggle')) {
+                var dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        // Audio Player functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const audio = document.getElementById('audio-element');
+            const playButton = document.getElementById('btn-play-pause');
+            const playIcon = document.getElementById('play-icon');
+            const progress = document.getElementById('progress');
+            const progressBar = document.querySelector('.progress-bar');
+            const currentTimeEl = document.getElementById('current-time');
+            const durationEl = document.getElementById('duration');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeIcon = document.getElementById('volume-icon');
+            const backward10 = document.getElementById('backward-10');
+            const forward10 = document.getElementById('forward-10');
+
+            // Format time in minutes and seconds
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            // Update progress bar
+            function updateProgress() {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progress.style.width = percent + '%';
+                currentTimeEl.textContent = formatTime(audio.currentTime);
+            }
+
+            // Set initial duration
+            audio.addEventListener('loadedmetadata', function() {
+                durationEl.textContent = formatTime(audio.duration);
+            });
+
+            // Play/pause
+            playButton.addEventListener('click', function() {
+                if (audio.paused) {
+                    audio.play();
+                    playIcon.classList.remove('fa-play');
+                    playIcon.classList.add('fa-pause');
+                } else {
+                    audio.pause();
+                    playIcon.classList.remove('fa-pause');
+                    playIcon.classList.add('fa-play');
+                }
+            });
+
+            // Update progress as audio plays
+            audio.addEventListener('timeupdate', updateProgress);
+
+            // Click on progress bar to seek
+            progressBar.addEventListener('click', function(e) {
+                const percent = e.offsetX / progressBar.offsetWidth;
+                audio.currentTime = percent * audio.duration;
+                updateProgress();
+            });
+            
+            // Volume control
+            volumeSlider.addEventListener('input', function() {
+                audio.volume = this.value;
+                updateVolumeIcon(this.value);
+            });
+            
+            function updateVolumeIcon(volume) {
+                volumeIcon.className = 'fas';
+                
+                if (volume >= 0.7) {
+                    volumeIcon.classList.add('fa-volume-up');
+                } else if (volume > 0) {
+                    volumeIcon.classList.add('fa-volume-down');
+                } else {
+                    volumeIcon.classList.add('fa-volume-mute');
+                }
+            }
+            
+            // Mute/unmute
+            volumeIcon.addEventListener('click', function() {
+                if (audio.muted) {
+                    audio.muted = false;
+                    volumeSlider.value = audio.volume;
+                    updateVolumeIcon(audio.volume);
+                } else {
+                    audio.muted = true;
+                    volumeSlider.value = 0;
+                    volumeIcon.className = 'fas fa-volume-mute';
+                }
+            });
+            
+            // Skip backward/forward 10 seconds
+            backward10.addEventListener('click', function() {
+                audio.currentTime = Math.max(0, audio.currentTime - 10);
+                updateProgress();
+            });
+            
+            forward10.addEventListener('click', function() {
+                audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                updateProgress();
+            });
+        });
+    </script>
+</body>
+</html> 

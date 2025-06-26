@@ -6,7 +6,6 @@ using EXE201.Commons.Models;
 using EXE201.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Serenity_Solution.Models;
 
 namespace Serenity_Solution.Controllers
@@ -21,18 +20,19 @@ namespace Serenity_Solution.Controllers
         private readonly IEmailService _emailService;
 
 
-        public HomeController(ILogger<HomeController> logger, UserManager<User> userManager, IAccountService accountService, 
-            IEmailService emailService, 
+        public HomeController(ILogger<HomeController> logger,UserManager<User> userManager, IAccountService accountService,
+            IEmailService emailService,
             SignInManager<User> signInManager,
             ApplicationDbContext context)
         {           
             _logger = logger;
+
             _accountService = accountService;
             _userManager = userManager;
             _emailService = emailService;
             _signInManager = signInManager;
             _context = context;
-        }       
+        }
 
         public async Task<IActionResult> Index()
         {
@@ -41,6 +41,13 @@ namespace Serenity_Solution.Controllers
                 // Redirect đến trang chính của Manager
                 return RedirectToAction("Index", "Manager");
             }
+
+            // Lấy 10 podcast có đánh giá cao nhất từ PodcastController
+            var podcasts = PodcastController.GetPodcasts()
+                .OrderByDescending(p => p.Rating)
+                .Take(10)
+                .ToList();
+
             var allDoctors = await _userManager.GetUsersInRoleAsync("Psychologist");
             var doctors = allDoctors.OrderBy(d => Guid.NewGuid()).Take(5).ToList();
 
@@ -49,6 +56,7 @@ namespace Serenity_Solution.Controllers
                 .OrderByDescending(p => p.Rating)
                 .Take(10)
                 .ToList(); // Giả sử bạn có DbSet<Podcast>
+
 
             // Truyền danh sách podcast vào view bằng ViewBag
             ViewBag.Podcasts = podcasts;
@@ -75,6 +83,7 @@ namespace Serenity_Solution.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 var viewModelC = new CombinedViewModel
+
                 {
                     Doctors = doctors,
                     Podcast = new PodcastViewModel
@@ -89,10 +98,9 @@ namespace Serenity_Solution.Controllers
                         Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn, nhưng chúng ta có thể học hỏi từ kinh nghiệm của người khác. Podcast này tập hợp những lời khuyên và hướng dẫn quý giá cho cuộc sống."
                     },
                     Contact = new Contact(),
-
                     currentUser = CurrentUser.Id
                 };
-                return View(viewModelC);
+                return View(viewModel);
             }
 
                 var viewModel = new CombinedViewModel
@@ -114,8 +122,7 @@ namespace Serenity_Solution.Controllers
                 //currentUser = CurrentUser.Id
             };
 
-            return View(viewModel);
-
+            return View(viewModelGuest);
         }
 
         [HttpPost]
@@ -152,6 +159,8 @@ namespace Serenity_Solution.Controllers
             return RedirectToAction("Index");
 
         }
+
+
 
 
         public IActionResult Privacy()

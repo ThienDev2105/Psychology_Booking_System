@@ -1,25 +1,65 @@
 ﻿@model Serenity_Solution.Models.CombinedViewModel
+
 @{
     ViewData["Title"] = "Home Page";
 }
 
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
 <div class="search-section" id="contactSection">
     <div class="search-container">
         <div class="search-tabs">
-            <div class="tab active" id="askTab">
+            <div class="tab active">
                 <h3>Đặt câu hỏi</h3>
                 <p>Đặt câu hỏi với chúng tôi</p>
-                @* <div class="underline"></div> *@
+                <div class="underline"></div>
             </div>
+
             <div class="tab" id="testTab" onclick="location.href='/Test/Index';" style="cursor: pointer;">
                 <h3>Kiểm tra sức khỏe nhanh</h3>
                 <p>Kiểm tra nhanh tâm lý của bạn</p>
             </div>
         </div>
-
+        
     </div>
 </div>
 
+<!-- Phần Podcast mới -->
+<section class="podcast-section">
+    <div class="podcast-main">
+        <h2>Podcast <span>cho bạn</span></h2>
+        <p class="description">Lắng nghe những câu chuyện truyền cảm hứng và lời khuyên hữu ích từ các chuyên gia.</p>
+    </div>
+
+    
+
+    <div class="view-more">
+        <a asp-controller="Podcast" asp-action="Index" class="view-more-btn">Xem thêm</a>
+    </div>
+    <div class="podcast-list-wrapper">
+        <div class="podcast-list">
+            @if (ViewBag.Podcasts != null)
+            {
+                @foreach (var podcast in ViewBag.Podcasts)
+                {
+                    <div class="podcast-card">
+                        <a asp-controller="Podcast" asp-action="Detail" asp-route-id="@podcast.Id">
+                            <img src="@podcast.ImageUrl" alt="@podcast.Title" class="podcast-image">
+                            <h4><strong>@podcast.Title</strong></h4>
+                            <p class="author">@podcast.Author</p>
+                            <p class="category">@podcast.Category</p>
+                            <div class="rating">
+                                <span>@podcast.Rating ★ (@podcast.RatingCount đánh giá)</span>
+                            </div>
+                            <p class="duration">@podcast.Duration</p>
+                        </a>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>
 
 <!-- Phần Podcast mới -->
 <section class="podcast-section">
@@ -61,6 +101,7 @@
     <h2>Danh sách <span>Bác sĩ</span></h2>
     <p class="description">Chăm sóc sức khỏe giúp mọi người duy trì sức khỏe tốt và phòng ngừa bệnh tật...</p>
 
+
     <div class="doctor-list-wrapper">
         <div class="doctor-list" id="doctorList">            
             @foreach (var doctor in Model.Doctors)
@@ -75,7 +116,6 @@
         </div>
     </div>
 </section>
-
 
 <!-- Contact Section -->
 <div class="contact-section" id="contact">
@@ -174,6 +214,7 @@
 </script>
 
     <style>
+
 
     .podcast-section {
         padding: 40px 20px;
@@ -305,9 +346,9 @@
     /* Contact Section */
     .contact-section {
         background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         margin-top: 2rem;
         max-width: 800px;
         margin-left: auto;
@@ -326,119 +367,147 @@
     .contact-title {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        font-size: 1.3rem;
+        gap: 0.75rem;
+        font-size: 1.5rem;
         font-weight: 600;
-        margin-bottom: 1.5rem;
-        color: #5aa;
+        margin-bottom: 2rem;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
+        font-family: 'Roboto', sans-serif;
     }
 
     .contact-form {
         display: grid;
-        gap: 1.5rem;
+        gap: 1.75rem;
     }
 
     .form-group {
         display: flex;
-        gap: 1rem;
+        gap: 1.25rem;
         width: 102%;
     }
 
     .form-input {
-        padding: 0.875rem 1rem;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
         font-size: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-sizing: border-box;
         width: 100%;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400;
+        color: #2c3e50;
+        background-color: #f8f9fa;
+        line-height: 1.5;
     }
 
+    .form-input:focus {
+        outline: none;
+        border-color: #52c234;
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(82, 194, 52, 0.15);
+    }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #52c234;
-            box-shadow: 0 0 0 3px rgba(82, 194, 52, 0.1);
-        }
+    .form-input::placeholder {
+        color: #94a3b8;
+        font-weight: 400;
+        font-family: 'Roboto', sans-serif;
+    }
 
     .form-textarea {
-        padding: 0.875rem 1rem;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
         font-size: 1rem;
-        min-height: 120px;
+        min-height: 150px;
         resize: vertical;
-        font-family: inherit;
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-        width: 100%; /* Đảm bảo textarea chiếm full width */
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400;
+        color: #2c3e50;
+        background-color: #f8f9fa;
+        line-height: 1.5;
     }
 
-        .form-textarea:focus {
-            outline: none;
-            border-color: #52c234;
-            box-shadow: 0 0 0 3px rgba(82, 194, 52, 0.1);
-        }
+    .form-textarea:focus {
+        outline: none;
+        border-color: #52c234;
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(82, 194, 52, 0.15);
+    }
+
+    .form-textarea::placeholder {
+        color: #94a3b8;
+        font-weight: 400;
+        font-family: 'Roboto', sans-serif;
+    }
 
     .submit-button {
-        background: #52c234;
+        background: linear-gradient(135deg, #52c234 0%, #4caf50 100%);
         color: white;
         border: none;
-        padding: 0.875rem 2rem;
-        border-radius: 8px;
-        font-size: 1rem;
+        padding: 1rem 2.5rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         justify-self: start;
-        min-width: 120px;
+        min-width: 140px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-family: 'Roboto', sans-serif;
     }
 
-        .submit-button:hover {
-            background: #4caf50;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(82, 194, 52, 0.3);
-        }
+    .submit-button:hover {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(82, 194, 52, 0.3);
+    }
+
+    .submit-button:active {
+        transform: translateY(0);
+    }
 
     /* Alert Styles */
     .alert {
-        padding: 12px 16px;
-        margin: 16px 0;
-        border-radius: 8px;
-        font-size: 14px;
+        padding: 1rem 1.25rem;
+        margin: 1.25rem 0;
+        border-radius: 12px;
+        font-size: 0.95rem;
         font-weight: 500;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.75rem;
+        letter-spacing: 0.3px;
+        font-family: 'Roboto', sans-serif;
     }
 
-    /* Success Alert - Xanh + Tích */
     .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        background-color: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #d1fae5;
     }
 
-        .alert-success::before {
-            content: "✓";
-            color: #28a745;
-            font-weight: bold;
-            font-size: 16px;
-        }
+    .alert-success::before {
+        content: "✓";
+        color: #059669;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
 
-    /* Error Alert - Đỏ + X */
     .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fee2e2;
     }
 
-        .alert-error::before {
-            content: "✕";
-            color: #dc3545;
-            font-weight: bold;
-            font-size: 16px;
-        }
+    .alert-error::before {
+        content: "✕";
+        color: #dc2626;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
 
     /* Doctor Section - Redesigned */
     .doctor-section {
@@ -548,3 +617,4 @@
             box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
         }
 </style>
+

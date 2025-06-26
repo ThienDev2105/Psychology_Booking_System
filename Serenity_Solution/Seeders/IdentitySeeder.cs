@@ -21,6 +21,7 @@ namespace Serenity_Solution.Seeders
                 }
             } 
             // Tìm hoặc tạo user Admin
+
             if (userManager.Users.All(u => u.Email != "admin@example.com"))
             {
                 var adminUser = new Admin

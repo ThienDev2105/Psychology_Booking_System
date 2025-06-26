@@ -50,7 +50,6 @@ body {
     display: flex;
     gap: 30px;
     align-items: center;
-    position: relative; /* Thêm position relative cho container */
 }
 
     .main-nav a {
@@ -58,8 +57,6 @@ body {
         color: #111;
         font-weight: 500;
         position: relative;
-        transition: color 0.3s ease; /* Thêm transition cho màu chữ */
-        padding-bottom: 4px; /* Tạo khoảng trống cho underline */
     }
 
         .main-nav a.active {
@@ -67,28 +64,16 @@ body {
             font-weight: bold;
         }
 
-    /* Tạo thanh indicator */
-    .main-nav::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: var(--indicator-left, 0);
-        height: 3px;
-        width: var(--indicator-width, 0);
-        background-color: #0f5e72;
-        border-radius: 2px;
-        transition: all 0.3s ease;
-        transform-origin: left center;
-    }
-    /* Thêm vào file CSS của bạn */
-    /*.main-nav a[asp-controller="Doctor"] {
-        color: #111 !important;*/ /* Thay #your-color bằng màu bạn muốn */
-    /*}
-
-        .main-nav a[asp-controller="Doctor"].active {
-            color: #0f5e72 !important;*/ /* Màu khi active */
-        /*}*/
-    
+            .main-nav a.active::after {
+                content: "";
+                position: absolute;
+                bottom: -4px;
+                left: 0;
+                height: 3px;
+                width: 100%;
+                background-color: #0f5e72;
+                border-radius: 2px;
+            }
 
 .auth-buttons {
     display: flex;
@@ -118,12 +103,24 @@ body {
 
 
 .search-section {
-    background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQa3_zuvcqTyOXXSYmZXFyNqtLh8rnOwo5_A&s') no-repeat center center;
+    background: url('/image/Podcast/Banner.jpeg') no-repeat center center;
     background-size: cover;
     padding: 80px 0;
     display: flex;
     justify-content: center;
+    position: relative;
 }
+
+    .search-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.0); /* Lớp phủ tối với độ mờ 30% */
+        z-index: 1;
+    }
 
 .search-container {
     background: white;
@@ -199,116 +196,128 @@ body {
 }
 
 .podcast-section {
-    padding: 30px;
-    background-color: #f1f6fb;
-    font-family: sans-serif;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #f9f9f9;
 }
 
-.section-title {
-    color: #67a7c8;
-    font-weight: bold;
-    font-size: 20px;
-    margin-bottom: 20px;
-}
-
-.podcast-feature {
-    display: flex;
-    background-color: #f6dcdc;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    gap: 20px;
-}
-
-.podcast-img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.podcast-content {
-    flex: 1;
-}
-
-.podcast-title {
-    color: #3c628a;
-    font-weight: bold;
-    font-size: 20px;
-    margin: 0 0 10px;
-}
-
-.controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-    .controls button {
-        border: none;
-        background: none;
-        font-size: 20px;
-        cursor: pointer;
+    .podcast-section h2 {
+        font-size: 2rem;
+        margin-bottom: 10px;
     }
 
-.rating {
-    background-color: #eee;
-    padding: 2px 6px;
-    border-radius: 6px;
-    font-size: 12px;
+        .podcast-section h2 span {
+            color: #007bff; /* Phù hợp với màu chủ đạo */
+        }
+
+    .podcast-section .description {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+.podcast-main {
+    text-align: left;
+    margin-right: auto;
 }
 
-.description {
-    font-size: 14px;
-    color: #333;
+.podcast-list-wrapper {
+    overflow-x: auto;
+    padding: 20px 0;
+    scrollbar-width: none; /* Ẩn thanh cuộn cho Firefox */
+    -ms-overflow-style: none; /* Ẩn thanh cuộn cho IE và Edge */
 }
 
-.podcast-list-header {
-    margin-bottom: 10px;
-    text-align: right;
-}
-
-    .podcast-list-header a {
-        color: #3c628a;
-        font-weight: bold;
-        text-decoration: none;
+    .podcast-list-wrapper::-webkit-scrollbar {
+        display: none; /* Ẩn thanh cuộn cho Chrome, Safari, Opera */
     }
 
 .podcast-list {
     display: flex;
     gap: 20px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 10px;
+    flex-wrap: nowrap; /* Cuộn ngang */
+    justify-content: flex-start; /* Căn trái thay vì căn giữa */
+    min-width: max-content; /* Đảm bảo danh sách đủ rộng để chứa tất cả item */
 }
-
-    .podcast-list::-webkit-scrollbar {
-        display: none; /* Ẩn thanh cuộn trên Chrome/Safari */
-    }
 
 .podcast-card {
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-    width: 180px;
-    background: white;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    flex: 0 0 250px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s;
 }
 
-    .podcast-card img {
-        width: 100%;
-        border-radius: 4px;
-        object-fit: cover;
+    .podcast-card:hover {
+        transform: translateY(-5px);
     }
 
-    .podcast-card p {
-        font-size: 13px;
-        margin-top: 8px;
-        color: #333;
+    .podcast-card a {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        padding: 15px;
     }
+
+.podcast-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.podcast-card h4 {
+    font-size: 1.2rem;
+    margin: 10px 0 5px;
+}
+
+.author {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.category {
+    font-size: 0.85rem;
+    color: #007bff;
+    margin: 5px 0;
+}
+
+.rating {
+    font-size: 0.9rem;
+    color: #f1c40f; /* Màu vàng cho ngôi sao */
+    margin: 5px 0;
+}
+
+.duration {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.view-more {
+    text-align: right; /* Căn chỉnh nội dung sang phải */
+    margin: 20px 0;
+}
+
+.view-more-btn {
+    text-decoration: none;
+    color: #1E90FF;
+    font-size: 16px;
+    font-weight: 500;
+    position: relative;
+    padding-bottom: 5px;
+    display: inline-block; /* Đảm bảo gạch chân hoạt động đúng */
+}
+
+    .view-more-btn::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #1E90FF;
+    }
+
 
 .doctor-section {
     padding: 40px;

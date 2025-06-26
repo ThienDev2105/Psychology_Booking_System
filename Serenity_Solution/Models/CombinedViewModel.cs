@@ -10,3 +10,4 @@ namespace Serenity_Solution.Models
         public string? currentUser { get; set; }
     }
 }
+

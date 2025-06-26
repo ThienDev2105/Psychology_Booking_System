@@ -55,6 +55,7 @@ namespace Serenity_Solution.Controllers
             var users = await _userManager.GetUsersInRoleAsync("Psychologist");
             var doctors = users.OfType<User>()
                 .Where(c => c.CertificateUrl != null && c.ProfilePictureUrl != null && c.Price > 0)
+
                 .ToList();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -105,12 +106,14 @@ namespace Serenity_Solution.Controllers
             var pagedDoctors = doctors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
+
             ViewBag.CurrentPage = page;
             ViewBag.SearchString = searchString;
             ViewBag.FilterType = filterType;
 
             return PartialView("_DoctorListPartial", pagedDoctors);
         }
+
 
 
         public async Task<IActionResult> Detail(string Id)
@@ -134,14 +137,15 @@ namespace Serenity_Solution.Controllers
                 Experience = experienceFormat,
                 Price = user.Price,
                 ProfilePictureUrl = user.ProfilePictureUrl,// hoặc null để dùng ảnh mặc định
-                Major = user.Major,
-                Contact = new Contact()
+                Major = user.Major
             };
+
             if (User.Identity.IsAuthenticated) 
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 ViewBag.UserId = currentUser.Id;
             }
+
             return View(psychologist);
         }
 

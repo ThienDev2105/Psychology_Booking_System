@@ -155,7 +155,7 @@ namespace Serenity_Solution.Controllers
 
                 // Tính toán điểm số
                 model.CalculateScores();
-
+                
                 // Lưu kết quả nếu người dùng đã đăng nhập
                 if (User.Identity.IsAuthenticated)
                 {
@@ -170,6 +170,7 @@ namespace Serenity_Solution.Controllers
                 // Chuyển đến trang kết quả với các tham số cần thiết
                 return RedirectToAction("DASS21Result", new
                 {
+
                     depression = model.DepressionScore,
                     anxiety = model.AnxietyScore,
                     stress = model.StressScore,
@@ -192,9 +193,9 @@ namespace Serenity_Solution.Controllers
         [HttpGet]
         [Route("DASS21Result")]
         public IActionResult DASS21Result(
-            int depression,
-            int anxiety,
-            int stress,
+            int depression, 
+            int anxiety, 
+            int stress, 
             string depressionLevel,
             string anxietyLevel,
             string stressLevel,
@@ -209,6 +210,7 @@ namespace Serenity_Solution.Controllers
             depressionLevel = string.IsNullOrEmpty(depressionLevel) ? "Bình thường" : depressionLevel;
             anxietyLevel = string.IsNullOrEmpty(anxietyLevel) ? "Bình thường" : anxietyLevel;
             stressLevel = string.IsNullOrEmpty(stressLevel) ? "Bình thường" : stressLevel;
+
 
             // Set the values in ViewData
             ViewData["DepressionScore"] = depression;
@@ -227,5 +229,5 @@ namespace Serenity_Solution.Controllers
         }
 
     }
-}
+
 

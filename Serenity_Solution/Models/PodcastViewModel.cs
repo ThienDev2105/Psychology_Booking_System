@@ -1,4 +1,8 @@
-﻿namespace Serenity_Solution.Models
+
+using System;
+
+namespace Serenity_Solution.Models
+
 {
     public class PodcastViewModel
     {
@@ -14,4 +18,5 @@
         public double Rating { get; set; }
         public int RatingCount { get; set; }
     }
-}
+} 
+

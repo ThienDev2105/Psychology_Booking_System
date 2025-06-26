@@ -4,14 +4,13 @@ using EXE201.Commons.Models;
 using EXE201.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serenity_Solution.Models;
 
 namespace Serenity_Solution.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class ManagerController : Controller
     {
         private readonly Cloudinary _cloudinary;
@@ -117,74 +116,6 @@ namespace Serenity_Solution.Controllers
 
             return View(pagedUsers);
         }
-        //Contact
-        public async Task<IActionResult> AllRequest(int page = 1, int pageSize = 5)
-        {
-            var ListRequest = await _context.Contacts
-                .Include(c => c.User)
-                .ToListAsync();
-
-            if (ListRequest.Count == 0)
-            {
-                TempData["NoWSDetail"] = true;
-                return RedirectToAction("Index", "Manager");
-            }
-
-            var model = ListRequest
-                .Select(s => new ContactViewModel
-                {
-                    UserId = s.UserId,
-                    Name = s.Name,
-                    Email = s.Email,
-                    Content = s.Content,
-                })
-                .ToList();
-            int totalUsers = model.Count();
-            var pagedUsers = model.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
-            ViewBag.CurrentPage = page;
-
-            return View(pagedUsers);
-        }
-        /*
-        [HttpGet]
-        public async Task<IActionResult> Resolve(string UserId)
-        {
-            var ListRequest = await _context.Contacts
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(c => c.UserId == UserId);
-
-            if (ListRequest == null) return NotFound();
-                var contactViewModel = new ContactViewModel
-            {
-                UserId = UserId,
-                Name = ListRequest.Name,
-                Email = ListRequest.Email,
-                Content = ListRequest.Content
-            };
-
-            return View(contactViewModel);
-        }
-        */
-        [HttpPost]
-        public async Task<IActionResult> Resolve(string UserId, string ResponseContent)
-        {
-            var contact = await _context.Contacts.Include(c => c.User).FirstOrDefaultAsync(c => c.UserId == UserId);
-            if (contact == null)
-                return NotFound();
-
-            // Gửi email
-            await _emailService.SendEmailAsync(contact.Email, "Phản hồi yêu cầu", ResponseContent);
-
-            // Có thể xóa yêu cầu nếu đã xử lý
-            _context.Contacts.Remove(contact);
-            await _context.SaveChangesAsync();
-
-            TempData["Message"] = "Phản hồi đã được gửi!";
-            return RedirectToAction("AllRequest");
-        }
-
 
         #region Resolve_Upgrade_Request
 

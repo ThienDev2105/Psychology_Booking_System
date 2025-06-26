@@ -534,16 +534,13 @@
             <h2 class="contact-title">
                 📩 Tương tác với chúng tôi
             </h2>
-            <form asp-action="SubmitContact" asp-controller="Home" asp-route-returnUrl="@Url.Action("Detail", "Doctor", new { Id = @Model.Id })" method="post" class="contact-form">
-                @Html.AntiForgeryToken()
+            <form asp-action="Contact" asp-controller="SendRequest" method="post" class="contact-form">
                 <div class="form-group">
-                    <input type="hidden" asp-for="Contact.UserId" value="@ViewBag.UserId" />
-                    <input type="text" asp-for="Contact.Name" placeholder="Họ tên" class="form-input" required>
-                    <span asp-validation-for="Contact.Name"></span>
-                    <input type="email" asp-for="Contact.Email" placeholder="Email" class="form-input" required>
-                    <span asp-validation-for="Contact.Email"></span>
+                    <input type="text" name="fullName" placeholder="Họ tên" class="form-input" required>
+                    <input type="email" name="email" placeholder="Email" class="form-input" required>
                 </div>
-                <textarea asp-for="Contact.Content" placeholder="Nội dung" class="form-textarea" required></textarea>
+                <textarea name="content" placeholder="Nội dung" class="form-textarea" required></textarea>
+                <input type="hidden" name="psychologistId" value="@Model.Id" />
                 <button type="submit" class="submit-button">Gửi</button>
             </form>
         </div>

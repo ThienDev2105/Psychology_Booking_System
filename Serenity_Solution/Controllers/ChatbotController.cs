@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Collections.Generic;
 
@@ -65,4 +65,6 @@ namespace Serenity_Solution.Controllers
             public string Message { get; set; }
         }
     }
-}
+
+} 
+

@@ -1,4 +1,9 @@
-﻿namespace Serenity_Solution.Models
+
+using System;
+using System.Collections.Generic;
+
+namespace Serenity_Solution.Models
+
 {
     public class ChatbotViewModel
     {
@@ -18,4 +23,6 @@
         public string Response { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
     }
-}
+
+} 
+

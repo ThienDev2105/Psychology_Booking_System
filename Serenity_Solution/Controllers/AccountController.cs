@@ -72,10 +72,17 @@ namespace Serenity_Solution.Controllers
                 var result = await _accountService.RegisterAsync(user, model.Password);
 
                 if (result.Succeeded)
+
                 {
                     TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
                     return RedirectToAction("Login");
                 }
+
+                
+                TempData["SuccessMessage"] = "Registration successful! Please login.";
+                return RedirectToAction("Login");
+            }
+
 
                 // Hiển thị lỗi nếu đăng ký thất bại
                 foreach (var error in result.Errors)
@@ -634,6 +641,7 @@ namespace Serenity_Solution.Controllers
             return View(model);
         }
 
+
         [HttpGet]
         public async Task<IActionResult> Scheduled_Appointments(int page = 1, int pageSize = 5)
         {
@@ -738,7 +746,9 @@ namespace Serenity_Solution.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> CustomerDashboard()
         {
+
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null) return NotFound();
 
             // Lấy các dữ liệu cần thiết cho dashboard
@@ -764,9 +774,9 @@ namespace Serenity_Solution.Controllers
                     CertificateUrl = user.CertificateUrl
                 },
 
-
                RecentAppointments = appointments.Take(5).ToList(),
                 
+
                 TotalAppointments = appointments.Count(),  // Thêm () để gọi phương thức Count()
                 
             };

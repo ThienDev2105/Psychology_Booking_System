@@ -12,7 +12,7 @@
 <div class="container">
     <div class="table-responsive">
         <table class="table table-bordered align-middle" style="min-width: 1000px;">
-            <thead class="table-dark">
+            <thead class="table-light">
                 <tr>
                     <th>Ảnh</th>
                     <th>Họ tên</th>
@@ -53,22 +53,14 @@
     </div>
 
     <!-- Phân trang -->
-    <nav>
-        <ul class="pagination justify-content-center" style="margin-top: 20px;">
-            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                <a class="page-link" asp-action="AllDoctor" asp-route-page="@(ViewBag.CurrentPage - 1)">Previous</a>
-            </li>
-
-            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+            @for (int i = 1; i <= totalPages; i++)
             {
-                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                    <a class="page-link" asp-action="AllDoctor" asp-route-page="@i">@i</a>
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("AllDoctor", new { page = i })">@i</a>
                 </li>
             }
-
-            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                <a class="page-link" asp-action="AllDoctor" asp-route-page="@(ViewBag.CurrentPage + 1)">Next</a>
-            </li>
         </ul>
     </nav>
 </div>

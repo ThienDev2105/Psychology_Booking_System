@@ -620,9 +620,14 @@ namespace EXE201.Commons.Migrations
                     b.Property<string>("RoleId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
@@ -874,6 +879,10 @@ namespace EXE201.Commons.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("EXE201.Commons.Models.User", null)
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId1");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -923,6 +932,8 @@ namespace EXE201.Commons.Migrations
                     b.Navigation("PodcastRatings");
 
                     b.Navigation("PsychologistAppointments");
+
+                    b.Navigation("UserRoles");
 
                     b.Navigation("UserTestResults");
                 });

@@ -54,21 +54,12 @@
 
 <!-- Phân trang -->
 <nav>
-    <ul class="pagination justify-content-center" style="margin-top: 20px;">
-        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-            <a class="page-link" asp-action="UpgradeRequest" asp-route-page="@(ViewBag.CurrentPage - 1)">Previous</a>
-        </li>
-
-        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+    <ul class="pagination">
+        @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
         {
-            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+            <li class="page-item @(i == (int)ViewBag.CurrentPage ? "active" : "")">
                 <a class="page-link" asp-action="UpgradeRequest" asp-route-page="@i">@i</a>
             </li>
         }
-
-        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-            <a class="page-link" asp-action="UpgradeRequest" asp-route-page="@(ViewBag.CurrentPage + 1)">Next</a>
-        </li>
     </ul>
 </nav>
-

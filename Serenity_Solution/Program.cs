@@ -12,13 +12,13 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Serenity_Solution.Seeders;
 using Serenity_Solution.Unity;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -98,6 +98,7 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// Ensure database is created
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -114,6 +115,7 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
