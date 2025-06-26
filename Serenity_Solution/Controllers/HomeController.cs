@@ -44,7 +44,7 @@ namespace Serenity_Solution.Controllers
             var allDoctors = await _userManager.GetUsersInRoleAsync("Psychologist");
             var doctors = allDoctors.OrderBy(d => Guid.NewGuid()).Take(5).ToList();
 
-            // Lấy 4 podcast có đánh giá cao nhất từ PodcastController
+            // Lấy 10 podcast có đánh giá cao nhất từ PodcastController
             var podcasts = PodcastController.GetPodcasts()
                 .OrderByDescending(p => p.Rating)
                 .Take(10)
