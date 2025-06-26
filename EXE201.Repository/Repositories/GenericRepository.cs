@@ -26,7 +26,12 @@ namespace EXE201.Repository.Repositories
             return await _dbSet.FindAsync(id);
         }
 
-
+        public T Get(Expression<Func<T, bool>> filter)
+        {
+            IQueryable<T> query = _dbSet;
+            query = query.Where(filter);
+            return query.FirstOrDefault();
+        }
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();

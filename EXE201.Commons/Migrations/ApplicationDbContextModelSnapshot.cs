@@ -17,7 +17,7 @@ namespace EXE201.Commons.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "8.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -144,6 +144,67 @@ namespace EXE201.Commons.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Conversation", b =>
+                {
+                    b.Property<int>("ConversationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConversationId"));
+
+                    b.Property<int?>("LastMessageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("User1Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("User2Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ConversationId");
+
+                    b.HasIndex("LastMessageId");
+
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Message", b =>
+                {
+                    b.Property<int>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
+
+                    b.Property<int>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MessageText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("EXE201.Commons.Models.Order", b =>
@@ -342,6 +403,9 @@ namespace EXE201.Commons.Migrations
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasPaidDASS21Test")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -643,6 +707,51 @@ namespace EXE201.Commons.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EXE201.Commons.Models.Conversation", b =>
+                {
+                    b.HasOne("EXE201.Commons.Models.Message", "LastMessage")
+                        .WithMany()
+                        .HasForeignKey("LastMessageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("EXE201.Commons.Models.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("EXE201.Commons.Models.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("LastMessage");
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Message", b =>
+                {
+                    b.HasOne("EXE201.Commons.Models.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EXE201.Commons.Models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("EXE201.Commons.Models.Order", b =>
                 {
                     b.HasOne("EXE201.Commons.Models.User", "User")
@@ -784,6 +893,11 @@ namespace EXE201.Commons.Migrations
             modelBuilder.Entity("EXE201.Commons.Models.Comment", b =>
                 {
                     b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Conversation", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("EXE201.Commons.Models.Podcast", b =>

@@ -26,14 +26,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-//add service and repository
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+//add service and repository
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-
+builder.Services.AddScoped<IChatService, ChatService>();
 //builder.Services.AddScoped<IVnPayServicecs, VnPayService>(); //Vnpay
 builder.Services.AddSingleton<IVnPayServicecs, VnPayService>();
 
@@ -107,7 +107,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         await IdentitySeeder.SeedRolesAndAdminAsync(serviceProvider);
-        await IdentitySeeder.SeedDataPsychologist(serviceProvider); // them
+        //await IdentitySeeder.SeedDataPsychologist(serviceProvider); // them
     }
     catch (Exception ex)
     {
@@ -149,6 +149,6 @@ app.UseExceptionHandler(errorApp =>
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.MapHub<ChatHub>("/chatHub");
 app.Run();
  

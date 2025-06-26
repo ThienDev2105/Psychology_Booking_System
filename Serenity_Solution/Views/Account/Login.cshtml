@@ -8,10 +8,16 @@
 
         <form asp-action="Login" asp-controller="Account" method="post" class="login-form">
             @* Hiển thị thông báo thành công *@
-            @if (TempData["SuccessMessage"] != null)
+            @if (TempData["ErrorMessage"] != null || !ViewData.ModelState.IsValid)
             {
-                <div style="color: green; margin-bottom: 15px;">
-                    @TempData["SuccessMessage"]
+                <div class="alert-error-custom">
+                    @TempData["ErrorMessage"]
+                    <ul>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
                 </div>
             }
 
@@ -24,7 +30,7 @@
                 </div>
             }
 
-            @* Hiển thị thông báo lỗi *@
+            @* Hiển thị thông báo lỗi 
             @if (!ViewData.ModelState.IsValid)
             {
                 <div class="validation-summary-errors" style="color: red; margin-bottom: 15px;">
@@ -36,7 +42,7 @@
                     </ul>
                 </div>
             }
-
+            *@
             <label>Email</label>
             <input type="email" name="Email" placeholder="example@gmail.com" required />
 
@@ -236,6 +242,18 @@
         border-radius: 6px;
         margin-bottom: 15px;
         font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .alert-error-custom{
+        background-color: #f07070;
+        color: #f80c1a;
+        border: 1px solid #cf0000;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        margin-top: 10px;
     }
 
 </style>

@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EXE201.Commons.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250529153950_Init")]
-    partial class Init
+    [Migration("20250625094234_AddHasPaidDASS21TestToUser")]
+    partial class AddHasPaidDASS21TestToUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "8.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -147,6 +147,67 @@ namespace EXE201.Commons.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Conversation", b =>
+                {
+                    b.Property<int>("ConversationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConversationId"));
+
+                    b.Property<int?>("LastMessageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("User1Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("User2Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ConversationId");
+
+                    b.HasIndex("LastMessageId");
+
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Message", b =>
+                {
+                    b.Property<int>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
+
+                    b.Property<int>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MessageText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("EXE201.Commons.Models.Order", b =>
@@ -346,6 +407,9 @@ namespace EXE201.Commons.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("HasPaidDASS21Test")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -353,11 +417,11 @@ namespace EXE201.Commons.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Major")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -398,10 +462,6 @@ namespace EXE201.Commons.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasFilter("[Email] IS NOT NULL");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -410,64 +470,11 @@ namespace EXE201.Commons.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("Name", "Major")
-                        .HasFilter("[Major] IS NOT NULL");
-
                     b.ToTable("AspNetUsers", (string)null);
 
                     b.HasDiscriminator().HasValue("User");
 
                     b.UseTphMappingStrategy();
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "1",
-                            AccessFailedCount = 0,
-                            Address = "Hà Nội, Việt Nam",
-                            BaBalance = 0.0,
-                            CertificateUrl = "certificate1.jpg",
-                            ConcurrencyStamp = "f070eb33-769b-494d-9edf-24d5babfb4c7",
-                            Description = "Chuyên gia tư vấn tâm lý với hơn 10 năm kinh nghiệm",
-                            Email = "doctor1@example.com",
-                            EmailConfirmed = true,
-                            Experience = "10 năm",
-                            Gender = "Unspecified",
-                            LockoutEnabled = false,
-                            Major = "Bác sĩ tâm thần",
-                            Name = "Nguyễn Văn A",
-                            Phone = "0123456789",
-                            PhoneNumberConfirmed = true,
-                            Price = 1000000m,
-                            ProfilePictureUrl = "doctor1.jpg",
-                            SecurityStamp = "19097167-5783-486e-8bbb-9eedc85dcdb5",
-                            TwoFactorEnabled = false,
-                            UserName = "doctor1@example.com"
-                        },
-                        new
-                        {
-                            Id = "2",
-                            AccessFailedCount = 0,
-                            Address = "TP.HCM, Việt Nam",
-                            BaBalance = 0.0,
-                            CertificateUrl = "certificate2.jpg",
-                            ConcurrencyStamp = "a3fd1b7d-3c7d-4ea2-ac25-cb892d15115d",
-                            Description = "Chuyên gia tư vấn tâm lý trẻ em và gia đình",
-                            Email = "doctor2@example.com",
-                            EmailConfirmed = true,
-                            Experience = "8 năm",
-                            Gender = "Unspecified",
-                            LockoutEnabled = false,
-                            Major = "Nhà tâm lý học lâm sàng",
-                            Name = "Trần Thị B",
-                            Phone = "0987654321",
-                            PhoneNumberConfirmed = true,
-                            Price = 800000m,
-                            ProfilePictureUrl = "doctor2.jpg",
-                            SecurityStamp = "f148987f-cd1e-4cdb-9eef-66765b7cfec1",
-                            TwoFactorEnabled = false,
-                            UserName = "doctor2@example.com"
-                        });
                 });
 
             modelBuilder.Entity("EXE201.Commons.Models.UserTestResult", b =>
@@ -703,6 +710,51 @@ namespace EXE201.Commons.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EXE201.Commons.Models.Conversation", b =>
+                {
+                    b.HasOne("EXE201.Commons.Models.Message", "LastMessage")
+                        .WithMany()
+                        .HasForeignKey("LastMessageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("EXE201.Commons.Models.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("EXE201.Commons.Models.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("LastMessage");
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Message", b =>
+                {
+                    b.HasOne("EXE201.Commons.Models.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EXE201.Commons.Models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("EXE201.Commons.Models.Order", b =>
                 {
                     b.HasOne("EXE201.Commons.Models.User", "User")
@@ -844,6 +896,11 @@ namespace EXE201.Commons.Migrations
             modelBuilder.Entity("EXE201.Commons.Models.Comment", b =>
                 {
                     b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("EXE201.Commons.Models.Conversation", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("EXE201.Commons.Models.Podcast", b =>

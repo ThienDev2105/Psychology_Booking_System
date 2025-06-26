@@ -42,7 +42,7 @@ namespace Serenity_Solution.Controllers
                 return RedirectToAction("Index", "Manager");
             }
             var allDoctors = await _userManager.GetUsersInRoleAsync("Psychologist");
-            var doctors = allDoctors.OrderBy(d => Guid.NewGuid()).Take(2).ToList();
+            var doctors = allDoctors.OrderBy(d => Guid.NewGuid()).Take(5).ToList();
 
             // Lấy 4 podcast có đánh giá cao nhất từ PodcastController
             var podcasts = PodcastController.GetPodcasts()

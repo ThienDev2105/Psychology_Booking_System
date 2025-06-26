@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using EXE201.Commons.Data;
-using Serenity_Solution.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using EXE201.Commons.Data;
 using EXE201.Commons.Models;
+using EXE201.Services.Interfaces;
+using EXE201.Services.Models;
+using EXE201.Services.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Serenity_Solution.Models;
 using System.Text.Json;
 
 namespace Serenity_Solution.Controllers
@@ -13,20 +17,113 @@ namespace Serenity_Solution.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IVnPayServicecs _vpnPayServicecs;
+        private readonly IEmailService _emailService;
 
-        public TestController(ApplicationDbContext context, UserManager<User> userManager)
+        public TestController(ApplicationDbContext context, UserManager<User> userManager, IVnPayServicecs vnPayServicecs, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _vpnPayServicecs = vnPayServicecs;
+            _emailService = emailService;
         }
 
         [HttpGet]
         [Route("")]
         [Route("Index")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            bool hasPaid = false;
+
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                hasPaid = user?.HasPaidDASS21Test ?? false;
+            }
+
+            ViewData["HasPaidDASS21Test"] = hasPaid;
             return View();
         }
+        [Authorize]
+        [HttpPost]
+        [Route("Payment")]
+        public IActionResult Payment([FromBody] TestPaymentRequest request)
+        {
+            try
+            {
+                double TestPrice = 29000;
+
+                var userBooking = _userManager.GetUserAsync(User).Result;
+                if (userBooking == null)
+                    return Unauthorized("User not logged in");
+
+                var orderId = new Random().Next(1000, 100000);
+                var vnPayModel = new TestPaymentRequest
+                {
+                    Amount = TestPrice,
+                    CreateDate = DateTime.Now,
+                    Description = $"Thanh toán thực hiện bài test",
+                    FullName = userBooking.Name,
+                    OrderId = orderId,
+                    TestType = request.TestType
+                };
+                var paymentUrl = _vpnPayServicecs.CreateTestPaymentUrl(HttpContext, vnPayModel);
+
+                return Json(new { success = true, redirectUrl = paymentUrl });
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu có
+                Console.WriteLine(ex.ToString());
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tạo thanh toán" });
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("PaymentCallBack")]
+        public async Task<IActionResult> PaymentCallBackAsync()
+        {
+            try
+            {
+                var response = _vpnPayServicecs.TestPaymentExecute(Request.Query);
+                var code = response.VnPayResponseCode;
+                if (response == null || response.VnPayResponseCode != "00")
+                {
+                    TempData["Testerror"] = "Lỗi thanh toán";
+                    return RedirectToAction("Index");
+
+                }
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                if (currentUser != null)
+                {
+                    await _emailService.SendEmailAsync(currentUser.Email, "Thanh toán thành công", $"Bạn đã thanh toán chi phí cho bài Test");
+                    currentUser.HasPaidDASS21Test = true;
+                    await _userManager.UpdateAsync(currentUser);
+                }
+                var adminAmount = _userManager.Users.FirstOrDefault(u => u.Email == "admin@example.com");
+                if (adminAmount != null)
+                {
+                    adminAmount.BaBalance += 29000; // Cộng 29,000 vào số dư của admin
+                    await _userManager.UpdateAsync(adminAmount);
+                }
+                await _context.SaveChangesAsync();
+
+                TempData["Testsuccess"] = "Thanh toán thành công";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu có
+                Console.Write(ex.ToString());
+                TempData["Testerror"] = "Có lỗi xảy ra trong quá trình xử lý";
+                return RedirectToAction("Index");
+            }
+
+        }
+
+
 
         [HttpGet]
         [Route("DASS21")]
@@ -128,6 +225,7 @@ namespace Serenity_Solution.Controllers
 
             return View();
         }
+
     }
 }
 

@@ -1,0 +1,66 @@
+﻿@model List<PsychologistViewModel>
+
+<div class="doctor-list">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var doctor in Model)
+        {
+            <div class="doctor-card">
+                <div class="doctor-info">
+                    <img src="@doctor.ProfilePictureUrl" alt="@doctor.Name" class="doctor-avatar" />
+                    <div class="doctor-details">
+                        <h3 class="doctor-name">@doctor.Name</h3>
+                        <p class="doctor-specialty">@doctor.Major</p>
+                        <p class="doctor-location">📍@(string.IsNullOrEmpty(doctor.Address) ? "Chưa cập nhật địa chỉ" : doctor.Address)</p>
+                        <p class="doctor-experience">🗓️ @Html.Raw((doctor.Experience ?? "Chưa cập nhật kinh nghiệm").Replace("\n", "<br/>"))</p>
+                        @if (doctor.Description != null)
+                        {
+                            <p class="doctor-description">📝 @doctor.Description</p>
+                        }
+                        <p class="doctor-price">👥 Chi phí tư vấn: <strong>@(doctor.Price.ToString("N0") ?? "0") VND</strong></p>
+                    </div>
+                </div>
+                <form asp-controller="Doctor" asp-action="Detail">
+                    <input type="hidden" name="Id" value="@doctor.Id" />
+                    <button class="contact-button">Liên hệ ngay</button>
+                </form>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="no-doctors">
+            <p>Hiện tại không có bác sĩ nào khả dụng.</p>
+        </div>
+    }
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+    <div class="pagination">
+
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <button type="button" onclick="loadDoctors(1)" class="page-link">« First</button>
+            <button type="button" onclick="loadDoctors(@(ViewBag.CurrentPage - 1))" class="page-link">« Back</button>
+        }
+
+        @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+        {
+            <button type="button" onclick="loadDoctors(@i)" class="page-link @(i == ViewBag.CurrentPage ? "active" : "")">
+                @i
+            </button>
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <button type="button" onclick="loadDoctors(@(ViewBag.CurrentPage + 1))" class="page-link">Next »</button>
+            <button type="button" onclick="loadDoctors(@ViewBag.TotalPages)" class="page-link">Last »</button>
+        }
+
+    </div>
+
+    <div class="page-info">
+        Page @ViewBag.CurrentPage of @ViewBag.TotalPages
+    </div>
+}
