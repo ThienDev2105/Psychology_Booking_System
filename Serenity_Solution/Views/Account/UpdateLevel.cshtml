@@ -1,18 +1,17 @@
-﻿
+﻿@model CertificateUploadViewModel
 
- @model CertificateUploadViewModel
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
 
 <div class="upload-container">
     <h2 class="form-title">Tải lên chứng chỉ của bạn</h2>
     <form asp-action="UpdateLevel" method="post" enctype="multipart/form-data" class="upload-form">
         <input type="hidden" asp-for="CustomerId" />
-
         <div class="form-group">
-            <label asp-for="CertificateFile" class="form-label">Chứng chỉ (.pdf, .jpg, .png)</label>
+            <label asp-for="CertificateFile" class="form-label">Chứng chỉ (.jpg, .png)</label>
             <input asp-for="CertificateFile" type="file" class="form-control file-input" />
-            <span asp-validation-for="CertificateFile" class="text-danger validation-message"></span>
+            <span asp-validation-for="CertificateFile" class="text-danger validation-message" style="display: none;"></span>
         </div>
-
         <button type="submit" class="btn-submit">Nộp chứng chỉ</button>
     </form>
 </div>
@@ -85,5 +84,212 @@
             background-color: #2563eb;
         }
 
+    /* Toast Styles */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        min-width: 300px;
+        max-width: 400px;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideInRight 0.3s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .toast.toast-error {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .toast.toast-success {
+            background-color: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+
+    .toast-icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        margin-top: 2px;
+    }
+
+    .toast-content {
+        flex: 1;
+    }
+
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    .toast-message {
+        font-size: 13px;
+        line-height: 1.4;
+        opacity: 0.9;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 8px;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+        flex-shrink: 0;
+    }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background-color: currentColor;
+        opacity: 0.3;
+        animation: toastProgress 4s linear;
+    }
+
+    @@keyframes slideInRight {
+        from
+
+    {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    }
+
+    @@keyframes slideOutRight {
+        from
+
+    {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    }
+
+    @@keyframes toastProgress {
+        from
+
+    {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+
+    }
+
+    .toast.removing {
+        animation: slideOutRight 0.3s ease-in;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .toast-container
+
+    {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        min-width: auto;
+        max-width: none;
+    }
+
+    }
 </style>
 
+<script>
+    // Simple Toast System
+    function showToast(type, title, message) {
+        const container = document.getElementById('toast-container');
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+
+        const iconSvg = type === 'error' ?
+            `<svg fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>` :
+            `<svg fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>`;
+
+        toast.innerHTML = `
+            <div class="toast-icon">${iconSvg}</div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="removeToast(this.closest('.toast'))">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+            <div class="toast-progress"></div>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto remove after 4 seconds
+        setTimeout(() => removeToast(toast), 4000);
+    }
+
+    function removeToast(toast) {
+        toast.classList.add('removing');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+
+    // Check for validation errors and show toast
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for validation errors
+        const validationErrors = document.querySelectorAll('.validation-message');
+        validationErrors.forEach(error => {
+            if (error.textContent.trim()) {
+                showToast('error', 'Lỗi xác thực', error.textContent.trim());
+            }
+        });
+
+        // Check for success message
+        
+    });
+</script>

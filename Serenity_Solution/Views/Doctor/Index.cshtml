@@ -3,80 +3,6 @@
     ViewData["Title"] = "Doctor Page";
 }
 
-<div class="search-section">
-    <div class="search-container">
-        <div class="search-tabs">
-            <a href="/Home/Index#contact" class="tab active" style="text-decoration: none; color: inherit;">
-                <h3>Đặt câu hỏi</h3>
-                <p>Đặt câu hỏi với chúng tôi</p>
-                
-            </a>
-            <div class="tab" onclick="location.href='/Test/Index';" style="cursor: pointer;">
-                <h3>Kiểm tra sức khỏe nhanh</h3>
-                <p>Kiểm tra nhanh tâm lý của bạn</p>
-            </div>
-        </div>
-        <form method="get" asp-controller="Doctor" asp-action="Index" class="search-form">
-            <div class="search-box">
-                <i class="search-icon">&#128269;</i>
-                <input type="text" name="searchString" placeholder="Search" value="@ViewBag.SearchString" />
-                <button type="submit"></button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<main>
-    <h2>Bác sĩ dành cho bạn</h2>
-    <div class="filters">
-        <form method="get" asp-action="Index">
-            <button type="submit">Bộ lọc</button>
-            <select name="filterType">
-                <option value="">-- Chọn bộ lọc --</option>
-                <option value="experience">Kinh nghiệm</option>
-                <option value="priceAsc">Giá thấp đến cao</option>
-                <option value="psychiatrist">Bác sĩ tâm thần</option>
-                <option value="clinicalPsychologist">Nhà tâm lý học lâm sàng</option>
-                <option value="counselor">Tư vấn viên tâm lý</option>
-            </select>
-        </form>
-    </div>
-
-
-    <div id="doctorContainer">
-        @Html.Partial("_DoctorListPartial", Model)
-    </div>
-
-    
-
-
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-        // Trong Doctor Page
-    document.querySelector('.tab[href="#contact"]').addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = '/Home/Index#contact';
-    });
-</script>
-<script>
-    function loadDoctors(page) {
-    const search = document.querySelector('input[name="searchString"]').value;
-    const filter = document.querySelector('select[name="filterType"]').value;
-
-        fetch(`/Doctor/GetDoctorList?searchString=${search}&filterType=${filter}&page=${page}`)
-        .then(response => response.text())
-        .then(html => {
-            console.log(html); // <-- kiểm tra output
-            document.getElementById("doctorContainer").innerHTML = html;
-            document.getElementById("doctorContainer").scrollIntoView({ behavior: 'smooth' });
-        });
-
-}
-
-</script>
-
 <style>
     .pagination {
         display: flex;
@@ -257,4 +183,80 @@
         font-size: 1.1rem;
     }
 </style>
+
+<div class="search-section">
+    <div class="search-container">
+        <div class="search-tabs">
+            <a href="/Home/Index#contact" class="tab active" style="text-decoration: none; color: inherit;">
+                <h3>Đặt câu hỏi</h3>
+                <p>Đặt câu hỏi với chúng tôi</p>
+                
+            </a>
+            <div class="tab" onclick="location.href='/Test/Index';" style="cursor: pointer;">
+                <h3>Kiểm tra sức khỏe nhanh</h3>
+                <p>Kiểm tra nhanh tâm lý của bạn</p>
+            </div>
+        </div>
+        <form method="get" asp-controller="Doctor" asp-action="Index" class="search-form">
+            <div class="search-box">
+                <i class="search-icon">&#128269;</i>
+                <input type="text" name="searchString" placeholder="Search" value="@ViewBag.SearchString" />
+                <button type="submit"></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<main>
+    <h2>Bác sĩ dành cho bạn</h2>
+    <div class="filters">
+        <form method="get" asp-action="Index">
+            <button type="submit">Bộ lọc</button>
+            <select name="filterType">
+                <option value="">-- Chọn bộ lọc --</option>
+                <option value="experience">Kinh nghiệm</option>
+                <option value="priceAsc">Giá thấp đến cao</option>
+                <option value="psychiatrist">Bác sĩ tâm thần</option>
+                <option value="clinicalPsychologist">Nhà tâm lý học lâm sàng</option>
+                <option value="counselor">Tư vấn viên tâm lý</option>
+            </select>
+        </form>
+    </div>
+
+
+    <div id="doctorContainer">
+        @Html.Partial("_DoctorListPartial", Model)
+    </div>
+
+    
+
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+        // Trong Doctor Page
+    document.querySelector('.tab[href="#contact"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = '/Home/Index#contact';
+    });
+</script>
+<script>
+    function loadDoctors(page) {
+    const search = document.querySelector('input[name="searchString"]').value;
+    const filter = document.querySelector('select[name="filterType"]').value;
+
+        fetch(`/Doctor/GetDoctorList?searchString=${search}&filterType=${filter}&page=${page}`)
+        .then(response => response.text())
+        .then(html => {
+            console.log(html); // <-- kiểm tra output
+            document.getElementById("doctorContainer").innerHTML = html;
+            document.getElementById("doctorContainer").scrollIntoView({ behavior: 'smooth' });
+        });
+
+}
+
+</script>
+
+
 
