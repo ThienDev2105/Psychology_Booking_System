@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Serenity_Solution.Models;
+using Serenity_Solution.Unity;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 
@@ -578,27 +579,39 @@ namespace Serenity_Solution.Controllers
             };
             return View(model);
         }
-
         [HttpPost]
         public async Task<IActionResult> UpdateLevel(CertificateUploadViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
-            //var customer = await _context.Customers.FindAsync(model.CustomerId);
             var user = await _accountService.GetUserByIdAsync(model.CustomerId);
-            var customer = user ; // Ép kiểu về Customer 
+            var customer = user;
+
             if (customer == null)
-            {
                 return NotFound();
-            }
 
             if (model.CertificateFile != null && model.CertificateFile.Length > 0)
             {
-                using var stream = model.CertificateFile.OpenReadStream();
+                var fileExt = Path.GetExtension(model.CertificateFile.FileName).ToLower();
+                if (fileExt != ".jpg" && fileExt != ".jpeg" && fileExt != ".png")
+                {
+                    ModelState.AddModelError("CertificateFile", "Chỉ chấp nhận ảnh định dạng JPG, PNG.");
+                    return View(model);
+                }
 
+                // ✅ Gọi AI để kiểm tra ảnh chứng chỉ
+                bool isValid = await AIHelper.IsMedicalCertificateAsync(model.CertificateFile);
+
+                if (!isValid)
+                {
+                    //hiện thông báo tại UpdateLevel
+                    ModelState.AddModelError("CertificateFile", "Ảnh không hợp lệ. Vui lòng tải lên ảnh chứng chỉ hành nghề bác sĩ rõ ràng.");
+                    return View(model); // Trả về UI gốc với lỗi
+                }
+
+                // ✅ Nếu hợp lệ, upload lên Cloudinary
+                using var stream = model.CertificateFile.OpenReadStream();
                 var uploadParams = new ImageUploadParams
                 {
                     File = new FileDescription(model.CertificateFile.FileName, stream),
@@ -607,28 +620,21 @@ namespace Serenity_Solution.Controllers
                 };
 
                 var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
-                if (uploadResult.StatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    ModelState.AddModelError("", $"Lỗi khi tải chứng chỉ lên Cloudinary: {uploadResult.Error?.Message}");
-                }
-
-
                 if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     customer.CertificateUrl = uploadResult.SecureUrl.ToString();
                     _context.Update(customer);
                     await _context.SaveChangesAsync();
 
-                    TempData["SuccessUpdate"] = "Chứng chỉ đã được tải lên thành công.";
+                    TempData["SuccessUpdate"] = "Chứng chỉ đã được xác nhận và lưu thành công.";
                     return RedirectToAction("CustomerProfile", new { id = model.CustomerId });
                 }
 
-                ModelState.AddModelError("", "Lỗi khi tải chứng chỉ lên Cloudinary.");
+                ModelState.AddModelError("", $"Lỗi khi upload lên Cloudinary: {uploadResult.Error?.Message}");
             }
             else
             {
-                ModelState.AddModelError("", "Vui lòng chọn tệp chứng chỉ để tải lên.");
+                ModelState.AddModelError("CertificateFile", "Vui lòng chọn ảnh để tải lên.");
             }
 
             return View(model);
