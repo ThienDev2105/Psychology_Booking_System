@@ -63,6 +63,7 @@ namespace Serenity_Solution.Controllers
                     Name = NameDefault,
                     Phone = model.Phone,
                     DateOfBirth = DateTime.Now,
+                    CreateDate = DateTime.Now,
                     Gender = model.Gender,
                     Address = model.Address,
                     ProfilePictureUrl = model.Gender == "Nam" 

@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Serenity_Solution.Models;
+using System.Globalization;
 
 namespace Serenity_Solution.Controllers
 {
@@ -30,12 +32,112 @@ namespace Serenity_Solution.Controllers
             _signInManager = signInManager;
             _context = context;
         }
-        public IActionResult Index()
+        public IActionResult Index(int YearField = 0, int MonthField = 0)
         {
+            // Lấy năm hiện tại nếu người dùng chưa chọn năm (YearField = 0)
+            int currentYear = DateTime.Now.Year;
+            if (YearField == 0) YearField = currentYear;
+
+            // Lấy toàn bộ dữ liệu cuộc hẹn có thời gian đặt lịch
+            // ToList() để chuyển sang xử lý trên bộ nhớ (client-side) vì EF không thể translate các hàm như .Year
+            var data = _context.Appointments
+                .Where(a => a.Scheduled_time != null)
+                .Include(a => a.Psychologist) // Bao gồm thông tin bác sĩ
+                .ToList();
+
+            var dataUser = _context.Users.ToList(); // Lấy toàn bộ người dùng để sử dụng trong biểu đồ Line
+
+            var chartLine = dataUser
+               .Where(u => u.CreateDate.HasValue && u.CreateDate.Value.Year == YearField &&
+                    (MonthField == 0 || u.CreateDate.Value.Month == MonthField))
+                .GroupBy(u => MonthField == 0 
+                    ? u.CreateDate.Value.Month    // Nếu chọn cả năm: nhóm theo tháng
+                    : u.CreateDate.Value.Day)     // Nếu chọn 1 tháng: nhóm theo ngày
+                .ToList();
+
+            var chartLineData = chartLine
+                .Select(g => new
+                {
+                    Key = g.Key,
+                    Label = MonthField == 0 ? $"Tháng {g.Key}" : g.Key.ToString(),
+                    Count = g.Count()
+                })
+                .OrderBy(x => x.Key)
+                .ToList();
+
+            // Lọc theo năm và tháng (nếu có), sau đó nhóm theo tháng (nếu xem cả năm) hoặc theo ngày (nếu xem 1 tháng cụ thể)
+            var chartData = data
+                .Where(a => a.Scheduled_time.Year == YearField &&
+                            (MonthField == 0 || a.Scheduled_time.Month == MonthField))
+                .GroupBy(a => MonthField == 0
+                    ? a.Scheduled_time.Month    // Nếu chọn cả năm: nhóm theo tháng
+                    : a.Scheduled_time.Day)     // Nếu chọn 1 tháng: nhóm theo ngày
+                .Select(g => new
+                {
+                    Key = g.Key,                                // Dùng để sắp xếp
+                    Label = MonthField == 0
+                        ? $"Tháng {g.Key}"                      // Nhãn trục X: "Tháng n" nếu xem theo năm
+                        : g.Key.ToString(),                     // Nhãn trục X: "n" nếu xem theo ngày trong tháng
+                    Total = g.Sum(a => a.Price ?? 0)            // Tổng tiền của từng nhóm
+                })
+                .OrderBy(x => x.Key)                            // Sắp xếp theo thứ tự tháng hoặc ngày tăng dần
+                .ToList();
+
+            //loc data cua tung bac si theo khoang thoi gian da chon
+            var chartDonutData = data
+                .Where(a => a.Scheduled_time.Year == YearField &&
+                            (MonthField == 0 || a.Scheduled_time.Month == MonthField))
+                .GroupBy(a => a.Psychologist.Name)             // Nhóm theo tên bác sĩ
+                .Select(g => new
+                {
+                    Label = g.Key,                              // Tên bác sĩ
+                    Total = g.Sum(a => a.Price ?? 0)           // Tổng doanh thu của bác sĩ đó
+                })
+                .ToList();
+
+            // Truyền dữ liệu sang view để vẽ biểu đồ
+            ViewBag.ChartLabels = chartData.Select(d => d.Label).ToList();  // Nhãn trục X
+            ViewBag.ChartData = chartData.Select(d => d.Total).ToList();    // Giá trị trục Y (doanh thu)
+
+
+            ViewBag.ChartDonutLabels = chartDonutData.Select(d => d.Label).ToList(); // Nhãn cho biểu đồ donut
+            ViewBag.ChartDonutData = chartDonutData.Select(d => d.Total).ToList();   // Giá trị cho biểu đồ donut
+
+            // Lưu lại năm/tháng đã chọn để khi render form dropdown không bị mất trạng thái
+            ViewBag.SelectedYear = YearField;
+            ViewBag.SelectedMonth = MonthField;
+
+            // Nếu không có dữ liệu thì báo lên view (hiển thị alert)
+            if (!chartData.Any())
+                TempData["NoWSDetail"] = true;
+
+            // Lấy danh sách năm có trong dữ liệu Appointment để đổ dropdown chọn năm
+            var years = _context.Appointments
+                .Select(a => a.Scheduled_time.Year)
+                .Distinct()
+                .OrderByDescending(y => y)
+                .ToList();
+
+            ViewBag.Years = years;
+
+            var AllUssers = _userManager.Users.Count();
+            var AllClients = _userManager.GetUsersInRoleAsync("Customer").Result.Count();
+            var AllDoctors = _userManager.GetUsersInRoleAsync("Psychologist").Result.Count();
+            ViewBag.AllUsers = AllUssers;
+            ViewBag.AllClients = AllClients;
+            ViewBag.AllDoctors = AllDoctors;
+            // Gửi lại thông báo lỗi (nếu có) sang view
             bool noDetails = TempData["NoWSDetail"] as bool? ?? false;
             ViewBag.NoWSDetail = noDetails;
+
+            ViewBag.LineLabels = chartLineData.Select(d => d.Label).ToList();  // Nhãn trục X
+            ViewBag.LineData = chartLineData.Select(d => d.Count).ToList();    // Số lượng user đăng ký
+
             return View();
         }
+
+
+
         public async Task<IActionResult> UpgradeRequest(int page = 1, int pageSize = 5)
         {
             var users = await _userManager.GetUsersInRoleAsync("Customer");
@@ -147,26 +249,8 @@ namespace Serenity_Solution.Controllers
 
             return View(pagedUsers);
         }
-        /*
-        [HttpGet]
-        public async Task<IActionResult> Resolve(string UserId)
-        {
-            var ListRequest = await _context.Contacts
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(c => c.UserId == UserId);
+        
 
-            if (ListRequest == null) return NotFound();
-                var contactViewModel = new ContactViewModel
-            {
-                UserId = UserId,
-                Name = ListRequest.Name,
-                Email = ListRequest.Email,
-                Content = ListRequest.Content
-            };
-
-            return View(contactViewModel);
-        }
-        */
         [HttpPost]
         public async Task<IActionResult> Resolve(string UserId, string ResponseContent)
         {

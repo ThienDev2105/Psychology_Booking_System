@@ -27,7 +27,7 @@ namespace EXE201.Commons.Models
 
         [NotMapped]
         public bool? DoctorCertificateUrl { get; set; } = false; // Indicates if the user has a doctor certificate
-
+        public DateTime? CreateDate { get; set; } = DateTime.Now; // Date when the user was created
         //psychologist
         public string? Degree { get; set; }
         public string? Description { get; set; } = string.Empty;
