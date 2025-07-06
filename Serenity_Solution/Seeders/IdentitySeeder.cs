@@ -60,7 +60,8 @@ namespace Serenity_Solution.Seeders
                     BaBalance = 0,
                     Gender = "Male",
                     HasPaidDASS21Test = false,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    CreateDate = new DateTime(2025, 6, 15, 10, 0, 0)
                 };
 
                 var result = await userManager.CreateAsync(user, "Thang152@");
@@ -97,7 +98,8 @@ namespace Serenity_Solution.Seeders
                     BaBalance = 0,
                     Gender = "Female",
                     HasPaidDASS21Test = false,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    CreateDate = new DateTime(2025, 6, 14, 10, 0, 0)
                 };
 
                 var result = await userManager.CreateAsync(user, "KimNguyen2105@");

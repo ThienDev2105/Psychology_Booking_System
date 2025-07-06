@@ -1,13 +1,163 @@
-﻿@{
+﻿@removeTagHelper "Microsoft.AspNetCore.Mvc.TagHelpers.OptionTagHelper, Microsoft.AspNetCore.Mvc.TagHelpers"
+
+@{
     Layout = "~/Views/Shared/_LayoutManager.cshtml";
+    var chartLabels = ViewBag.ChartLabels as List<string>;
+    var chartData = ViewBag.ChartData as List<decimal>;
+    var chartDonutLabels = ViewBag.ChartDonutLabels as List<string>;
+    var chartDonutData = ViewBag.ChartDonutData as List<decimal>;
+    var lineLabels = ViewBag.LineLabels as List<string>;
+    var lineData = ViewBag.LineData as List<int>;
+
+
+    var years = ViewBag.Years as List<int>;
+    var selectedYear = ViewBag.SelectedYear;
+    var selectedMonth = ViewBag.SelectedMonth;
+    var TotalUser = ViewBag.AllUsers as int? ?? 0;
+    var TotalClient = ViewBag.AllClients as int? ?? 0;
+    var TotalDoctors = ViewBag.AllDoctors as int? ?? 0;
 }
+
+
+<style>
+    .filter-form {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .charts-container {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .chart-box {
+        width: 500px; /* tăng kích thước */
+        height: 400px;
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        overflow: visible; /* thêm dòng này nếu label bị cắt */
+    }
+
+
+    .info-boxes {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .info-box {
+        padding: 10px 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #fff;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .line-section {
+        text-align: center;
+        margin: 30px 0;
+    }
+
+        .line-section h4 {
+            font-weight: bold;
+        }
+
+    .bottom-section {
+        margin-top: 40px;
+        text-align: center;
+    }
+
+    .bottom-chart {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+
+<div>
+    <!-- Bộ lọc năm/tháng -->
+    <form method="get" class="filter-form">
+        <select name="YearField" class="form-select">
+            <option value="0">Chọn năm</option>
+            @foreach (var year in years)
+            {
+                <option value="@year" @(year == selectedYear ? "selected" : "")>@year</option>
+            }
+        </select>
+
+        <select name="MonthField" class="form-select">
+            <option value="0" @(selectedMonth == 0 ? "selected" : "")>Cả năm</option>
+            @for (int i = 1; i <= 12; i++)
+            {
+                <option value="@i" @(selectedMonth == i ? "selected" : "")>@i</option>
+            }
+        </select>
+
+        <button type="submit" class="btn btn-primary">Xem</button>
+    </form>
+
+    <!-- Biểu đồ -->
+    <div class="charts-container">
+        <div class="chart-box">
+            <canvas id="myChart" width="400" height="300"></canvas>
+        </div>
+        <div class="chart-box">
+            <canvas id="myDoughnutChart" width="500" height="400" style="margin: auto"></canvas>
+        </div>
+    </div>
+
+    <!-- Tổng hợp thông tin -->
+    <div class="info-boxes">
+        <div class="info-box">Tổng người dùng: @TotalUser</div>
+        <div class="info-box">Khách hàng: @TotalClient</div>
+        <div class="info-box">Bác sĩ: @TotalDoctors</div>
+    </div>
+
+    <!-- Line Chart (Người đăng ký) -->
+    <div class="line-section">
+        <h4>Line Chart</h4>
+        <p>(số người dùng đăng ký trong khoảng thời gian)</p>
+        <div class="bottom-chart">
+            <canvas id="lineRegisterChart" width="800" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Line Chart (Truy cập web) -->
+    <div class="bottom-section">
+        <div class="info-box">Số người truy cập website</div>
+        <div class="bottom-chart">
+            <canvas id="lineAccessChart" width="800" height="300"></canvas>
+            <p>Line Chart (số người truy cập)</p>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 
 @section Scripts {
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function () {
-            var noWSDetail = '@(TempData["NoWSDetail"])';
+            $(document).ready(function () {
+            var noWSDetail = '@TempData["NoWSDetail"]';
             if (noWSDetail === 'True') {
                 Swal.fire({
                     title: 'Thông báo',
@@ -16,7 +166,142 @@
                     confirmButtonText: 'OK'
                 });
             }
+            //bar chart
+            const ctx = document.getElementById('myChart');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(chartLabels)),
+                    datasets: [{
+                        label: 'Tổng doanh thu',
+                        data: @Html.Raw(Json.Serialize(chartData)),
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value.toLocaleString('vi-VN') + ' ₫';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            //donut chart
+        const doughnutCtx = document.getElementById('myDoughnutChart');
+
+        // Lấy dữ liệu từ Razor View
+        const donutLabels = @Html.Raw(Json.Serialize(chartDonutLabels));
+        const donutData = @Html.Raw(Json.Serialize(chartDonutData));
+
+        // Tính tổng doanh thu
+        const totalRevenue = donutData.reduce((sum, value) => sum + value, 0);
+
+        // Tính phần trăm doanh thu
+        const donutPercentData = donutData.map(value => parseFloat(((value / totalRevenue) * 100).toFixed(2)));
+
+        // Tạo biểu đồ
+        new Chart(doughnutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: donutLabels.map((label, index) => `${label} (${donutPercentData[index]}%)`),
+                datasets: [{
+                    label: 'Tỷ lệ doanh thu (%)',
+                    data: donutPercentData,
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#8BC34A',
+                        '#FF9800',
+                        '#9C27B0',
+                        '#03A9F4',
+                        '#E91E63',
+                        '#009688',
+                        '#795548'
+                    ],
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const index = context.dataIndex;
+                                const rawValue = donutData[index].toLocaleString('vi-VN');
+                                return `${donutLabels[index]}: ${rawValue} ₫ (${donutPercentData[index]}%)`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 20,
+                            font: {
+                                size: 14
+                            },
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+
+                }
+            }
         });
+
+        const lineCtx = document.getElementById('lineRegisterChart');
+
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(lineLabels)),
+                datasets: [{
+                    label: 'Số người đăng ký',
+                    data: @Html.Raw(Json.Serialize(lineData)),
+                    fill: false,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.parsed.y} người đăng ký`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    });
     </script>
 
 }
