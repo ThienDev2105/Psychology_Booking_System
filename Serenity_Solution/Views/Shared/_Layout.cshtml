@@ -13,6 +13,68 @@
     <!-- Thêm Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    <style>
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1e3a8a;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+            .dropdown-toggle:hover {
+                background-color: #f0f4ff;
+            }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            padding: 8px 0;
+            margin-top: 8px;
+        }
+
+            .dropdown-menu.show {
+                display: block;
+            }
+
+        .dropdown-item {
+            display: block;
+            padding: 10px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+            .dropdown-item:hover {
+                background-color: #f5f5f5;
+                color: #1e40af;
+            }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 8px 0;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -201,67 +263,7 @@
 
 </script>
 
-<style>   
-    /* Dropdown Styles */
-    .dropdown {
-        position: relative;
-        display: inline-block;
-    }
 
-    .dropdown-toggle {
-        background: none;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #1e3a8a;
-        font-weight: 500;
-        padding: 8px 12px;
-        border-radius: 4px;
-        transition: all 0.3s;
-    }
-
-        .dropdown-toggle:hover {
-            background-color: #f0f4ff;
-        }
-
-    .dropdown-menu {
-        display: none;
-        position: absolute;
-        right: 0;
-        background-color: white;
-        min-width: 200px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        z-index: 1000;
-        padding: 8px 0;
-        margin-top: 8px;
-    }
-
-        .dropdown-menu.show {
-            display: block;
-        }
-
-    .dropdown-item {
-        display: block;
-        padding: 10px 16px;
-        color: #333;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-        .dropdown-item:hover {
-            background-color: #f5f5f5;
-            color: #1e40af;
-        }
-
-    .dropdown-divider {
-        height: 1px;
-        background-color: #eee;
-        margin: 8px 0;
-    }
-</style>
 
 <script>
     function toggleDropdown() {

@@ -1,0 +1,56 @@
+﻿@removeTagHelper "Microsoft.AspNetCore.Mvc.TagHelpers.OptionTagHelper, Microsoft.AspNetCore.Mvc.TagHelpers"
+@{
+    var chartLabels = ViewBag.ChartLabels as List<string>;
+    var chartData = ViewBag.ChartData as List<decimal>;
+    var years = ViewBag.Years as List<int>;
+    var selectedYear = ViewBag.SelectedYear;
+    var selectedMonth = ViewBag.SelectedMonth;
+}
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    $(document).ready(function () {
+        var noWSDetail = '@TempData["NoWSDetail"]';
+        if (noWSDetail === 'True') {
+            Swal.fire({
+                title: 'Thông báo',
+                text: 'Hiện chưa có dữ liệu',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        const ctx = document.getElementById('myChart');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(chartLabels)),
+                datasets: [{
+                    label: 'Tổng doanh thu',
+                    data: @Html.Raw(Json.Serialize(chartData)),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString('vi-VN') + ' ₫';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
