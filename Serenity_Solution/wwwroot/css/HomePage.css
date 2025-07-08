@@ -118,7 +118,7 @@ body {
 
 
 .search-section {
-    background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQa3_zuvcqTyOXXSYmZXFyNqtLh8rnOwo5_A&s') no-repeat center center;
+    background: url('/image/Podcast/banner2.png') no-repeat center center;
     background-size: cover;
     padding: 80px 0;
     display: flex;
