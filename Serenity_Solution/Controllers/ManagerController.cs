@@ -268,7 +268,74 @@ namespace Serenity_Solution.Controllers
             TempData["Message"] = "Phản hồi đã được gửi!";
             return RedirectToAction("AllRequest");
         }
+        #region blogs
+            public async Task<IActionResult> AllBlogs(int page = 1, int pageSize = 5)
+            {
+                var blogs = await _context.Blogs
+                    .Where(b => b.Status == false)
+                    .Include(b => b.Author)
+                    .ToListAsync();
+                if (blogs.Count == 0)
+                {
+                    TempData["NoWSDetail"] = true;
+                    return RedirectToAction("Index");
+                }
+                var blogList = blogs.Select(b => new BlogViewModel
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Content = b.Content,
+                    AuthorName = b.Author.Name,
+                    CreatedAt = b.CreateDate,
+                    ThumbnailUrl = b.ThumbnailUrl
+                }).ToList();
+                int totalBlogs = blogList.Count();
+                var pagedBlogs = blogList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                ViewBag.TotalPages = (int)Math.Ceiling((double)totalBlogs / pageSize);
+                ViewBag.CurrentPage = page;
+                return View(pagedBlogs);
+            }
 
+        [HttpGet]
+        public async Task<IActionResult> BlogDetails(int id)
+        {
+            var blog = await _context.Blogs.Include(b => b.Author).FirstOrDefaultAsync(b => b.Id == id && b.Status == false);
+            if (blog == null)
+                return NotFound();
+            
+            return View(blog);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApproveBlog(int id)
+        {
+            var blog = await _context.Blogs.FindAsync(id);
+            if (blog == null)
+            {
+                TempData["ErrorMessageBlog"] = "Không tìm thấy bài viết.";
+                return RedirectToAction("AllBlogs");
+            }
+            blog.Status = true; // Đánh dấu là đã duyệt
+            _context.Blogs.Update(blog);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessageBlog"] = "Bài viết đã được duyệt thành công.";
+            return RedirectToAction("AllBlogs");
+        }
+        [HttpPost]
+        public async Task<IActionResult> RejectBlog(int id)
+        {
+            var blog = await _context.Blogs.FindAsync(id);
+            if (blog == null)
+            {
+                TempData["ErrorMessageBlog"] = "Không tìm thấy bài viết.";
+                return RedirectToAction("AllBlogs");
+            }
+            _context.Blogs.Remove(blog); // Xóa bài viết
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessageBlog"] = "Bài viết đã bị từ chối và xóa thành công.";
+            return RedirectToAction("AllBlogs");
+        }
+        #endregion
 
         #region Resolve_Upgrade_Request
 

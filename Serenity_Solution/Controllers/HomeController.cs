@@ -78,17 +78,17 @@ namespace Serenity_Solution.Controllers
                 {
                     Doctors = doctors,
                     Podcast = new List<PodcastViewModel>
-{
-    new PodcastViewModel
-    {
-        Title = "Life Update: Cuộc sống của mình sau pobcast",
-        ImageUrl = "/image/Podcast/ThePresent2.png",
-        AudioUrl = "/Audio/LifeUpdate.mp3",
-        Rating = 4.6,
-        RatingCount = 205,
-        Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn..."
-    }
-},
+                    {
+                        new PodcastViewModel
+                        {
+                            Title = "Life Update: Cuộc sống của mình sau pobcast",
+                            ImageUrl = "/image/Podcast/ThePresent2.png",
+                            AudioUrl = "/Audio/LifeUpdate.mp3",
+                            Rating = 4.6,
+                            RatingCount = 205,
+                            Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn..."
+                        }
+                    },
                     Contact = new Contact(),
 
                     currentUser = CurrentUser.Id
@@ -100,17 +100,17 @@ namespace Serenity_Solution.Controllers
                 {
                 Doctors = doctors,
                     Podcast = new List<PodcastViewModel>
-{
-    new PodcastViewModel
-    {
-        Title = "Life Update: Cuộc sống của mình sau pobcast",
-        ImageUrl = "/image/Podcast/ThePresent2.png",
-        AudioUrl = "/audio/LifeUpdate.mp3",
-        Rating = 4.6,
-        RatingCount = 205,
-        Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn..."
-    }
-},
+                    {
+                        new PodcastViewModel
+                        {
+                            Title = "Life Update: Cuộc sống của mình sau pobcast",
+                            ImageUrl = "/image/Podcast/ThePresent2.png",
+                            AudioUrl = "/audio/LifeUpdate.mp3",
+                            Rating = 4.6,
+                            RatingCount = 205,
+                            Description = "Giới thiệu: Cuộc đời không có sẵn hướng dẫn..."
+                        }
+                    },
                 Contact = new Contact(),
               
                 //currentUser = CurrentUser.Id
