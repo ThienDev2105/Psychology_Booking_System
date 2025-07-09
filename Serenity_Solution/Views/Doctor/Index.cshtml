@@ -199,9 +199,9 @@
         </div>
         <form method="get" asp-controller="Doctor" asp-action="Index" class="search-form">
             <div class="search-box">
-                <i class="search-icon">&#128269;</i>
+                <i class="search-icon"><i class="fas fa-search"></i></i>
                 <input type="text" name="searchString" placeholder="Search" value="@ViewBag.SearchString" />
-                <button type="submit"></button>
+                @* <button type="submit"></button> *@
             </div>
         </form>
     </div>

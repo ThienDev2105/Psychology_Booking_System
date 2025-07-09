@@ -1,21 +1,5 @@
 ﻿@model CertificateUploadViewModel
 
-<!-- Toast Container -->
-<div id="toast-container" class="toast-container"></div>
-
-<div class="upload-container">
-    <h2 class="form-title">Tải lên chứng chỉ của bạn</h2>
-    <form asp-action="UpdateLevel" method="post" enctype="multipart/form-data" class="upload-form">
-        <input type="hidden" asp-for="CustomerId" />
-        <div class="form-group">
-            <label asp-for="CertificateFile" class="form-label">Chứng chỉ (.jpg, .png)</label>
-            <input asp-for="CertificateFile" type="file" class="form-control file-input" />
-            <span asp-validation-for="CertificateFile" class="text-danger validation-message" style="display: none;"></span>
-        </div>
-        <button type="submit" class="btn-submit">Nộp chứng chỉ</button>
-    </form>
-</div>
-
 <style>
     .upload-container {
         max-width: 600px;
@@ -170,46 +154,37 @@
     }
 
     @@keyframes slideInRight {
-        from
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
 
-    {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 
     @@keyframes slideOutRight {
-        from
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
 
-    {
-        transform: translateX(0);
-        opacity: 1;
-    }
-
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
     }
 
     @@keyframes toastProgress {
-        from
+        from {
+            width: 100%;
+        }
 
-    {
-        width: 100%;
-    }
-
-    to {
-        width: 0%;
-    }
-
+        to {
+            width: 0%;
+        }
     }
 
     .toast.removing {
@@ -218,21 +193,36 @@
 
     /* Responsive */
     @@media (max-width: 768px) {
-        .toast-container
+        .toast-container {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+        }
 
-    {
-        top: 10px;
-        right: 10px;
-        left: 10px;
-    }
-
-    .toast {
-        min-width: auto;
-        max-width: none;
-    }
-
+        .toast {
+            min-width: auto;
+            max-width: none;
+        }
     }
 </style>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<div class="upload-container">
+    <h2 class="form-title">Tải lên chứng chỉ của bạn</h2>
+    <form asp-action="UpdateLevel" method="post" enctype="multipart/form-data" class="upload-form">
+        <input type="hidden" asp-for="CustomerId" />
+        <div class="form-group">
+            <label asp-for="CertificateFile" class="form-label">Chứng chỉ (.jpg, .png)</label>
+            <input asp-for="CertificateFile" type="file" class="form-control file-input" />
+            <span asp-validation-for="CertificateFile" class="text-danger validation-message" style="display: none;"></span>
+        </div>
+        <button type="submit" class="btn-submit">Nộp chứng chỉ</button>
+    </form>
+</div>
+
+
 
 <script>
     // Simple Toast System

@@ -384,7 +384,7 @@
             this.toasts = [];
         }
 
-        show(type, title, message, duration = 5000) {
+        show(type, title, message, duration = 3000) {
             const toast = this.createToast(type, title, message, duration);
             this.container.appendChild(toast);
             this.toasts.push(toast);
@@ -512,8 +512,8 @@
     // Example usage (you can call these from anywhere in your code)
     function showExampleToasts() {
         toastManager.success('Thành công!', 'Chứng chỉ đã được tải lên thành công.');
-        setTimeout(() => toastManager.error('Lỗi!', 'Có lỗi xảy ra khi xử lý yêu cầu.'), 1000);
+        setTimeout(() => toastManager.error('Lỗi!', 'Có lỗi xảy ra khi xử lý yêu cầu.'), 2000);
         setTimeout(() => toastManager.warning('Cảnh báo!', 'Vui lòng kiểm tra lại thông tin.'), 2000);
-        setTimeout(() => toastManager.info('Thông tin!', 'Hệ thống sẽ được bảo trì vào 2h sáng.'), 3000);
+        setTimeout(() => toastManager.info('Thông tin!', 'Hệ thống sẽ được bảo trì vào 2h sáng.'), 1000);
     }
 </script>

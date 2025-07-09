@@ -32,6 +32,7 @@ namespace EXE201.Commons.Data
         public virtual DbSet<Contact> Contacts { get; set; }
         public virtual DbSet<Conversation> Conversations { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
+        public virtual DbSet<Blog> Blogs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

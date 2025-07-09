@@ -63,6 +63,48 @@ namespace EXE201.Commons.Migrations
                     b.ToTable("Appointments");
                 });
 
+            modelBuilder.Entity("EXE201.Commons.Models.Blog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("BlogType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("Blogs");
+                });
+
             modelBuilder.Entity("EXE201.Commons.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -680,6 +722,15 @@ namespace EXE201.Commons.Migrations
                     b.Navigation("Psychologist");
                 });
 
+            modelBuilder.Entity("EXE201.Commons.Models.Blog", b =>
+                {
+                    b.HasOne("EXE201.Commons.Models.User", "Author")
+                        .WithMany("BlogsCreated")
+                        .HasForeignKey("AuthorId");
+
+                    b.Navigation("Author");
+                });
+
             modelBuilder.Entity("EXE201.Commons.Models.Comment", b =>
                 {
                     b.HasOne("EXE201.Commons.Models.Comment", "ParentComment")
@@ -917,6 +968,8 @@ namespace EXE201.Commons.Migrations
 
             modelBuilder.Entity("EXE201.Commons.Models.User", b =>
                 {
+                    b.Navigation("BlogsCreated");
+
                     b.Navigation("ClientAppointments");
 
                     b.Navigation("Contacts");

@@ -42,6 +42,8 @@ namespace EXE201.Commons.Models
         public virtual ICollection<PodcastRating> PodcastRatings { get; set; } = new List<PodcastRating>();
         public virtual ICollection<Contact> Contacts { get; set; } = new List<Contact>();
 
+        public virtual ICollection<Blog> BlogsCreated { get; set; } = new List<Blog>();
+
         //customer
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<Appointment> ClientAppointments { get; set; }
