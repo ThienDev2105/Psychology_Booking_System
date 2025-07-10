@@ -647,7 +647,7 @@ namespace Serenity_Solution.Controllers
             var user = await _userManager.GetUserAsync(User);           
 
             var ListAppointments = await _context.Appointments
-                .Where(a => a.Psychologist_ID == user.Id && a.Status == "Booked")
+                .Where(a => a.Psychologist_ID == user.Id || a.Client_ID == user.Id && a.Status == "Booked")
                 .Include(a => a.Client)
                 .Include(a => a.Psychologist)
                 .ToListAsync();
@@ -668,7 +668,10 @@ namespace Serenity_Solution.Controllers
         [HttpPost]
         public async Task<IActionResult> AcceptAppointment(int id)
         {
-            var appointment = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == id);
+            var appointment = await _context.Appointments
+                .Include(a => a.Client)
+                .Include(a => a.Psychologist)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (appointment == null)
             {
@@ -678,14 +681,36 @@ namespace Serenity_Solution.Controllers
             appointment.Status = "Confirmed";
             _context.Appointments.Update(appointment);
             _context.SaveChanges();
-
-            if(User.IsInRole("Psychologist"))
+            var doctorBooked = appointment.Psychologist.Name;
+            if (doctorBooked == null)
             {
-                // Gửi email thông báo cho khách hàng
-                var emailContent = $"Cuộc hẹn tư vấn của bạn với  {appointment.Psychologist.Name} đã được xác nhận.";
-                await _emailService.SendEmailAsync(appointment.Client.Email, "Xác Nhận tư vấn", emailContent);
-            }           
+                doctorBooked = "Bác sĩ";
+            }
+            // Gửi email thông báo cho khách hàng
+            var emailContent = $"Cuộc hẹn tư vấn của bạn với  {doctorBooked} đã được xác nhận.";
+            await _emailService.SendEmailAsync(appointment.Client.Email, "Xác Nhận tư vấn", emailContent);
+            
+            // 2. create conversation
+            var existingConversation = await _context.Conversations
+            .FirstOrDefaultAsync(c =>
+                (c.User1Id == appointment.Client_ID && c.User2Id == appointment.Psychologist_ID) ||
+                (c.User1Id == appointment.Psychologist_ID && c.User2Id == appointment.Client_ID));
 
+            if (existingConversation == null)
+            {
+                // 3. Nếu chưa có -> Tạo Conversation mới
+                var conversation = new Conversation
+                {
+                    User1Id = appointment.Client_ID,
+                    User2Id = appointment.Psychologist_ID
+                };
+
+                _context.Conversations.Add(conversation);
+                await _context.SaveChangesAsync();
+
+
+            }
+            //end
             return RedirectToAction(nameof(Scheduled_Appointments));
    
         }

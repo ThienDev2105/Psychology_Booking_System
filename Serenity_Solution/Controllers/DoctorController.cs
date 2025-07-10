@@ -218,7 +218,7 @@ namespace Serenity_Solution.Controllers
                 doctorSelected.BaBalance  += (double)doctorSelected.Price * 0.9;
                 await _userManager.UpdateAsync(doctorSelected);
                 await _context.SaveChangesAsync();
-
+                /*
      // 2. create conversation
                 var existingConversation = await _context.Conversations
                 .FirstOrDefaultAsync(c =>
@@ -240,6 +240,7 @@ namespace Serenity_Solution.Controllers
                     
                 }
                 //end
+                */
                 TempData["success"] = "Thanh toán thành công";
                 return RedirectToAction("Detail", "Doctor", new { Id = doctorId });
             }
