@@ -68,7 +68,7 @@ namespace Serenity_Solution.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Psychologist")]
+        [Authorize(Roles = "Psychologist, Admin")]
         public async Task<IActionResult> Create(BlogCreateViewModel model)
         {
             if (!ModelState.IsValid)

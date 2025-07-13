@@ -34,7 +34,9 @@
                         <li>
                             <a class="nav-link text-dark" asp-area="" asp-controller="Manager" asp-action="AllBlogs">Phê duyệt các blog</a>
                         </li>
-
+                        <li>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Blogs" asp-action="Index">Trang blog</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         @if (User.Identity.IsAuthenticated)

@@ -187,6 +187,7 @@ namespace Serenity_Solution.Controllers
                 Experience = s.Experience,
                 ProfilePictureUrl = s.ProfilePictureUrl,
                 Major = s.Major,
+                BaBalance = s.BaBalance,
             }).ToList();
             int totalUsers = userList.Count();
             var pagedUsers = userList.Skip((page - 1) * pageSize).Take(pageSize).ToList();

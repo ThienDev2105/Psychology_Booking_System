@@ -106,7 +106,7 @@ namespace EXE201.Services.Services
             vnpay.AddRequestData("vnp_CurrCode", _config["VnPay:CurrCode"]);
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
             vnpay.AddRequestData("vnp_Locale", _config["VnPay:Locale"]);
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán chi phí tư vấn cho bài test");
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán chi phí cho bài test");
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", _config["VnPay:PaymentBackReturnTestUrl"]);
             vnpay.AddRequestData("vnp_TxnRef", tick);
