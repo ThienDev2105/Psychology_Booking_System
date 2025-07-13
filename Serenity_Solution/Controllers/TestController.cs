@@ -51,7 +51,7 @@ namespace Serenity_Solution.Controllers
         {
             try
             {
-                double TestPrice = 19000;
+                double TestPrice = 29000;
 
                 var userBooking = _userManager.GetUserAsync(User).Result;
                 if (userBooking == null)

@@ -23,6 +23,7 @@
                     <th>Chuyên ngành</th>
                     <th>Kinh nghiệm</th>
                     <th>Giá</th>
+                    <th>Tổng doanh thu</th>
                     <th>Mô tả</th>
                     <th>Hành động</th>
                 </tr>
@@ -40,8 +41,9 @@
                         <td>@doctor.Address</td>
                         <td><a href="@doctor.Degree" target="_blank">Xem chứng chỉ</a></td>
                         <td>@doctor.Major</td>
-                        <td>@doctor.Experience năm</td>
+                        <td>@doctor.Experience</td>
                         <td>@doctor.Price VNĐ</td>
+                        <td>@doctor.BaBalance VNĐ</td>
                         <td style="white-space: nowrap; overflow-x: auto; max-width: 200px;">@doctor.Description</td>
                         <td>
                             <a href="@Url.Action("Detail", "Doctor", new { id = doctor.Id })" class="btn btn-sm btn-primary">Chi tiết</a>
