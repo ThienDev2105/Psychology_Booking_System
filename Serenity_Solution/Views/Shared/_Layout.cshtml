@@ -103,6 +103,8 @@
                    class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Test" ? "active" : "")">Kiểm tra tâm lý</a>
                 <a asp-controller="Doctor" asp-action="Index"
                    class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Doctor" ? "active" : "")">Danh sách bác sĩ</a>
+                <a asp-controller="Blogs" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Blogs" ? "active" : "")">Blogs</a>
             </nav>
             <div class="auth-buttons">
                 @if (User.Identity.IsAuthenticated)

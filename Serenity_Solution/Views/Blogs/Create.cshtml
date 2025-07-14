@@ -1,0 +1,264 @@
+﻿@model BlogCreateViewModel
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 30px auto;
+        padding: 30px;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+    }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="file"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 120px;
+        }
+
+    .form-container button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .form-container button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+<style>
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .custom-toast {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        color: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(244, 67, 54, 0.3);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 320px;
+        max-width: 400px;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .custom-toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .custom-toast.hide {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+    .toast-icon {
+        font-size: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+    }
+
+    .toast-content {
+        flex: 1;
+    }
+
+    .toast-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+
+    .toast-message {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        opacity: 0.7;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+    }
+
+        .toast-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        width: 100%;
+        transform-origin: left;
+        animation: progressBar 5s linear forwards;
+    }
+
+    @@keyframes progressBar {
+        from {
+            transform: scaleX(1);
+        }
+
+        to {
+            transform: scaleX(0);
+        }
+    }
+</style>
+
+
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="form-container">
+    <h2>Tạo Blog mới</h2>
+
+    <form asp-action="Create" enctype="multipart/form-data" method="post">
+        <div class="form-group">
+            <label>Tiêu đề</label>
+            <input asp-for="Title" />
+        </div>
+        <div class="form-group">
+            <label>Thumbnail</label>
+            <input type="file" asp-for="Thumbnail" />
+        </div>
+        <div class="form-group">
+            <label>Loại Blog</label>
+            <select asp-for="BlogType">
+                <option value="">-- Chọn loại blog --</option>
+                <option>Bệnh tâm lý phổ biến</option>
+                <option>Rối loạn tâm trạng</option>
+                <option>Tâm lý học lâm sàng</option>
+                <option>Kỹ năng quản lý cảm xúc</option>
+                <option>Tư vấn và trị liệu tâm lý</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Tóm tắt</label>
+            <textarea asp-for="Summary"></textarea>
+        </div>
+        <div class="form-group">
+            <label>File nội dung (.docx)</label>
+            <input type="file" asp-for="ContentFile" />
+        </div>
+        <button type="submit">Tạo blog</button>
+    </form>
+</div>
+
+<script>
+    class ToastManager {
+        constructor() {
+            this.container = document.getElementById('toastContainer');
+        }
+
+        error(title, message, duration = 4000) {
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast show';
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.classList.add('hide')">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="toast-progress"></div>
+            `;
+
+            this.container.appendChild(toast);
+
+            // Auto-hide
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => {
+                    if (toast && toast.parentElement) toast.remove();
+                }, 400);
+            }, duration);
+        }
+    }
+
+    const toastManager = new ToastManager();
+
+    document.addEventListener('DOMContentLoaded', function () {
+        @if (TempData["ErrorBlog"] != null)
+        {
+                <text>
+                    toastManager.error("Lỗi!", "@TempData["ErrorBlog"]");
+                </text>
+        }
+    });
+</script>
+
+<!-- Font Awesome for icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

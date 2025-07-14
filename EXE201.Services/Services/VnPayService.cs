@@ -21,6 +21,8 @@ namespace EXE201.Services.Services
         //doctor detail
         public string CreatePaymentUrl(HttpContext context, VnPaymentRequestModel model)
         {
+            var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_config["TimeZoneId"]);
+            var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             string paymentUrl = "";
 
             var tick = DateTime.Now.Ticks.ToString();
@@ -29,7 +31,7 @@ namespace EXE201.Services.Services
             vnpay.AddRequestData("vnp_Command", _config["VnPay:Command"]);
             vnpay.AddRequestData("vnp_TmnCode", _config["VnPay:TmnCode"]);
             vnpay.AddRequestData("vnp_Amount", (model.Amount * 100).ToString());
-            vnpay.AddRequestData("vnp_CreateDate", model.CreateDate.ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss")); //model.CreateDate.ToString("yyyyMMddHHmmss")); 
             vnpay.AddRequestData("vnp_CurrCode", _config["VnPay:CurrCode"]);
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
             vnpay.AddRequestData("vnp_Locale", _config["VnPay:Locale"]);
@@ -90,6 +92,8 @@ namespace EXE201.Services.Services
         //test payment 
         public string CreateTestPaymentUrl(HttpContext context, TestPaymentRequest model)
         {
+            var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_config["TimeZoneId"]);
+            var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             string paymentUrl = "";
 
             var tick = DateTime.Now.Ticks.ToString();
@@ -98,11 +102,11 @@ namespace EXE201.Services.Services
             vnpay.AddRequestData("vnp_Command", _config["VnPay:Command"]);
             vnpay.AddRequestData("vnp_TmnCode", _config["VnPay:TmnCode"]);
             vnpay.AddRequestData("vnp_Amount", (model.Amount * 100).ToString());
-            vnpay.AddRequestData("vnp_CreateDate", model.CreateDate.ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));//model.CreateDate.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", _config["VnPay:CurrCode"]);
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
             vnpay.AddRequestData("vnp_Locale", _config["VnPay:Locale"]);
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán chi phí tư vấn cho bài test");
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán chi phí cho bài test");
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", _config["VnPay:PaymentBackReturnTestUrl"]);
             vnpay.AddRequestData("vnp_TxnRef", tick);

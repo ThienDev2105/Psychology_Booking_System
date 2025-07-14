@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspose.Words" Version="25.7.0" />
     <PackageReference Include="CloudinaryDotNet" Version="1.27.5" />
     <PackageReference Include="EPPlus" Version="8.0.1" />
     <PackageReference Include="Google.Cloud.Vision.V1" Version="3.7.0" />
@@ -37,6 +38,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\image\Degree\" />
+    <Folder Include="wwwroot\blog\" />
+    <Folder Include="wwwroot\TypeScript\" />
   </ItemGroup>
 
 </Project>

@@ -42,13 +42,16 @@
                         <td>@item.Notes</td>
                         <td>@String.Format("{0:N0} VND", item.Price)</td>
                         <td class="action-buttons">
-                            <form asp-action="AcceptAppointment" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="@item.Id" />
-                                <button type="submit" class="btn btn-accept"
-                                        onclick="return confirm('Bạn có chắc chắn xác nhận cuộc hẹn?');">
-                                    <i class="fas fa-check-circle"></i> Chấp nhận
-                                </button>
-                            </form>
+                            @if (User.IsInRole("Psychologist"))
+                            {
+                                <form asp-action="AcceptAppointment" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-accept"
+                                    onclick="return confirm('Bạn có chắc chắn xác nhận cuộc hẹn?');">
+                                        <i class="fas fa-check-circle"></i> Chấp nhận
+                                    </button>
+                                </form>
+                            }
                             <form asp-action="RejectAppointment" method="post" style="display:inline;">
                                 <input type="hidden" name="id" value="@item.Id" />
                                 <button type="submit" class="btn btn-reject"

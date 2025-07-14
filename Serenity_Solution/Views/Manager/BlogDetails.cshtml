@@ -1,0 +1,10 @@
+﻿@using EXE201.Commons.Models
+@model Blog
+
+<h2>@Model.Title</h2>
+<img src="@Model.ThumbnailUrl" style="max-width: 300px;" />
+<p>@Model.Summary</p>
+<hr />
+<div class="blog-content" style="font-family:'Segoe UI'; font-size: 17px;">
+    @Html.Raw(Model.Content)
+</div>
