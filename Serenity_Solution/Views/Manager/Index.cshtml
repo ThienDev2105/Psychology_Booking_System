@@ -16,6 +16,7 @@
     var TotalUser = ViewBag.AllUsers as int? ?? 0;
     var TotalClient = ViewBag.AllClients as int? ?? 0;
     var TotalDoctors = ViewBag.AllDoctors as int? ?? 0;
+    var totalRevenue = ViewBag.AllAmoutOfadmin as int? ?? 0;
 }
 
 
@@ -123,6 +124,7 @@
         <div class="info-box">Tổng người dùng: @TotalUser</div>
         <div class="info-box">Khách hàng: @TotalClient</div>
         <div class="info-box">Bác sĩ: @TotalDoctors</div>
+        <div class="info-box">Doanh thu admin thông qua đặt lịch: @totalRevenue</div>
     </div>
 
     <!-- Line Chart (Người đăng ký) -->

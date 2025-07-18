@@ -19,13 +19,15 @@ namespace Serenity_Solution.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IVnPayServicecs _vpnPayServicecs;
         private readonly IEmailService _emailService;
+        private readonly IMomoService _momoService;
 
-        public TestController(ApplicationDbContext context, UserManager<User> userManager, IVnPayServicecs vnPayServicecs, IEmailService emailService)
+        public TestController(ApplicationDbContext context, UserManager<User> userManager, IVnPayServicecs vnPayServicecs, IEmailService emailService, IMomoService momoService)
         {
             _context = context;
             _userManager = userManager;
             _vpnPayServicecs = vnPayServicecs;
             _emailService = emailService;
+            _momoService = momoService;
         }
 
         [HttpGet]
@@ -47,8 +49,40 @@ namespace Serenity_Solution.Controllers
         [Authorize]
         [HttpPost]
         [Route("Payment")]
-        public IActionResult Payment([FromBody] TestPaymentRequest request)
+        public async Task<IActionResult> Payment([FromBody] TestPaymentRequest request)
         {
+            try
+            {
+                double TestPrice = 29000;
+
+                var userBooking = _userManager.GetUserAsync(User).Result;
+                if (userBooking == null)
+                    return Unauthorized("User not logged in");
+
+                var momoRequest = new TestPaymentRequest
+                {
+                    Amount = TestPrice,
+                    CreateDate = DateTime.Now,
+                    Description = $"Thanh toán bài test",
+                    FullName = userBooking.Name,
+                    OrderId = Guid.NewGuid().ToString(),
+                    TestType = request.TestType
+                };
+
+                var momoResponse = await _momoService.CreatePaymentAsync(momoRequest);
+                if (string.IsNullOrEmpty(momoResponse.PayUrl))
+                {
+                    return Json(new { success = false, message = "Không thể tạo liên kết thanh toán MoMo." });
+                }
+                return Json(new { success = true, redirectUrl = momoResponse.PayUrl });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tạo thanh toán" });
+            }
+            /*
             try
             {
                 double TestPrice = 29000;
@@ -77,6 +111,7 @@ namespace Serenity_Solution.Controllers
                 Console.WriteLine(ex.ToString());
                 return Json(new { success = false, message = "Có lỗi xảy ra khi tạo thanh toán" });
             }
+            */
         }
 
         [Authorize]
@@ -84,42 +119,75 @@ namespace Serenity_Solution.Controllers
         [Route("PaymentCallBack")]
         public async Task<IActionResult> PaymentCallBackAsync()
         {
+
             try
             {
-                var response = _vpnPayServicecs.TestPaymentExecute(Request.Query);
-                var code = response.VnPayResponseCode;
-                if (response == null || response.VnPayResponseCode != "00")
+                var response = _momoService.PaymentExecuteAsync(HttpContext.Request.Query);
+                var requestQuery = HttpContext.Request.Query;
+                if (requestQuery["resultCode"] != 0) // ko thanh cong 
                 {
-                    TempData["Testerror"] = "Lỗi thanh toán";
-                    return RedirectToAction("Index");
-
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    if (currentUser != null)
+                    {
+                        await _emailService.SendEmailAsync(currentUser.Email, "Thanh toán thất bại", "Thanh toán bài test không thành công. Vui lòng thử lại sau.");
+                        currentUser.HasPaidDASS21Test = true;
+                        await _userManager.UpdateAsync(currentUser);                       
+                    }
+                    var adminAmount = _userManager.Users.FirstOrDefault(u => u.Email == "admin@example.com");
+                    if (adminAmount != null)
+                    {
+                        adminAmount.BaBalance += 29000; // Cộng 29,000 vào số dư của admin
+                        await _userManager.UpdateAsync(adminAmount);
+                    }
+                    await _context.SaveChangesAsync();
+                    TempData["Testsuccess"] = "Thanh toán thành công";
+                   
                 }
-                var currentUser = await _userManager.GetUserAsync(User);
-
-                if (currentUser != null)
-                {
-                    await _emailService.SendEmailAsync(currentUser.Email, "Thanh toán thành công", $"Bạn đã thanh toán chi phí cho bài Test");
-                    currentUser.HasPaidDASS21Test = true;
-                    await _userManager.UpdateAsync(currentUser);
-                }
-                var adminAmount = _userManager.Users.FirstOrDefault(u => u.Email == "admin@example.com");
-                if (adminAmount != null)
-                {
-                    adminAmount.BaBalance += 29000; // Cộng 29,000 vào số dư của admin
-                    await _userManager.UpdateAsync(adminAmount);
-                }
-                await _context.SaveChangesAsync();
-
-                TempData["Testsuccess"] = "Thanh toán thành công";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 // Log lỗi nếu có
-                Console.Write(ex.ToString());
+                Console.WriteLine(ex.ToString());
                 TempData["Testerror"] = "Có lỗi xảy ra trong quá trình xử lý";
                 return RedirectToAction("Index");
             }
+            //try
+            //{
+            //    var response = _vpnPayServicecs.TestPaymentExecute(Request.Query);
+            //    var code = response.VnPayResponseCode;
+            //    if (response == null || response.VnPayResponseCode != "00")
+            //    {
+            //        TempData["Testerror"] = "Lỗi thanh toán";
+            //        return RedirectToAction("Index");
+
+            //    }
+            //    var currentUser = await _userManager.GetUserAsync(User);
+
+            //    if (currentUser != null)
+            //    {
+            //        await _emailService.SendEmailAsync(currentUser.Email, "Thanh toán thành công", $"Bạn đã thanh toán chi phí cho bài Test");
+            //        currentUser.HasPaidDASS21Test = true;
+            //        await _userManager.UpdateAsync(currentUser);
+            //    }
+            //    var adminAmount = _userManager.Users.FirstOrDefault(u => u.Email == "admin@example.com");
+            //    if (adminAmount != null)
+            //    {
+            //        adminAmount.BaBalance += 29000; // Cộng 29,000 vào số dư của admin
+            //        await _userManager.UpdateAsync(adminAmount);
+            //    }
+            //    await _context.SaveChangesAsync();
+
+            //    TempData["Testsuccess"] = "Thanh toán thành công";
+            //    return RedirectToAction(nameof(Index));
+            //}
+            //catch (Exception ex)
+            //{
+            //    // Log lỗi nếu có
+            //    Console.Write(ex.ToString());
+            //    TempData["Testerror"] = "Có lỗi xảy ra trong quá trình xử lý";
+            //    return RedirectToAction("Index");
+            //}
 
         }
 

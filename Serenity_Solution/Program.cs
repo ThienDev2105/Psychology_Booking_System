@@ -7,6 +7,7 @@ using EXE201.Services.Hubs;
 using EXE201.Services.Interfaces;
 using EXE201.Services.Models;
 using EXE201.Services.Services;
+using Google.Api;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serenity_Solution.Seeders;
 using Serenity_Solution.Unity;
+using static EXE201.Services.Models.OrderInfoModel;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +38,12 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 //builder.Services.AddScoped<IVnPayServicecs, VnPayService>(); //Vnpay
 builder.Services.AddSingleton<IVnPayServicecs, VnPayService>();
+
+
+builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+builder.Services.AddScoped<IMomoService, MomoService>();
+
+
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
