@@ -133,10 +133,13 @@ namespace Serenity_Solution.Controllers
             ViewBag.LineLabels = chartLineData.Select(d => d.Label).ToList();  // Nhãn trục X
             ViewBag.LineData = chartLineData.Select(d => d.Count).ToList();    // Số lượng user đăng ký
 
+            var AllAmoutOfadmin = _userManager.Users.FirstOrDefault(u => u.Email == "admin@example.com");
+            if (AllAmoutOfadmin != null)
+            {
+                ViewBag.AllAmoutOfadmin = AllAmoutOfadmin.BaBalance;
+            }
             return View();
         }
-
-
 
         public async Task<IActionResult> UpgradeRequest(int page = 1, int pageSize = 5)
         {

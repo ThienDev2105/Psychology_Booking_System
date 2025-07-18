@@ -207,16 +207,24 @@ namespace Serenity_Solution.Controllers
 
                 //await _context.AddAsync(invoice);
                 await _context.Appointments.AddAsync(invoice);
-                
+                var adminAmount = _userManager.Users.FirstOrDefault(u => u.Email == "admin@example.com");
 
                 var customer = await _userManager.FindByIdAsync(invoice.Client_ID);
 
                 if (doctorSelected != null)
                 {
                     await _emailService.SendEmailAsync(doctorSelected.Email, "Đặt lịch hẹn thành công", $"Bạn đã được đặt lịch tư vấn với {customer.Name}. Vui lòng kiểm tra thông tin chi tiết trong hệ thống.");
+                    doctorSelected.BaBalance += (double)doctorSelected.Price * 0.9;
+                    await _userManager.UpdateAsync(doctorSelected);
                 }
-                doctorSelected.BaBalance  += (double)doctorSelected.Price * 0.9;
-                await _userManager.UpdateAsync(doctorSelected);
+
+                if (adminAmount != null && doctorSelected != null)
+                {
+                    adminAmount.BaBalance += (double)doctorSelected.Price * 0.1; // Admin receives 10% of the payment
+                    await _userManager.UpdateAsync(adminAmount);
+                }
+                
+
                 await _context.SaveChangesAsync();
                 /*
      // 2. create conversation
