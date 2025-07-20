@@ -126,6 +126,42 @@ body {
   color: #333;
   font-size: 16px;
 }
+
+.login-btn {
+    background: #9ec9d3;
+    color: #fff !important;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 32px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-right: 18px;
+    transition: background 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+.login-btn:hover {
+    background: #7bb2c2;
+}
+
+.signup-link {
+    background: none;
+    color: #1e2772 !important;
+    border: none;
+    font-size: 1.3rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 12px 32px 12px 0;
+    border-radius: 30px;
+    transition: color 0.2s;
+    display: inline-block;
+}
+.signup-link:hover {
+    color: #0d1a4d !important;
+    text-decoration: underline;
+}
 </style>
 <body>
   <div class="login-container">
@@ -147,10 +183,8 @@ body {
         </div>
 
         <div class="buttons">
-          <button class="btn-primary">Đăng Nhập</button>
-          <button class="btn-outline">
-             <a href="http://127.0.0.1:5500/Serenity%20Solution/Login/Register.html">Đăng ký</a>
-          </button>
+          <a asp-controller="Account" asp-action="Login" class="login-btn">Đăng Nhập</a>
+          <a asp-controller="Account" asp-action="Register" class="signup-link">Đăng Ký</a>
         </div>
 
         <p class="login-google">Hoặc đăng nhập với <a href="#">Google</a></p>

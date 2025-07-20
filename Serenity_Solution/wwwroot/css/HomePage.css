@@ -67,19 +67,7 @@ body {
             font-weight: bold;
         }
 
-    /* Tạo thanh indicator */
-    .main-nav::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: var(--indicator-left, 0);
-        height: 3px;
-        width: var(--indicator-width, 0);
-        background-color: #0f5e72;
-        border-radius: 2px;
-        transition: all 0.3s ease;
-        transform-origin: left center;
-    }
+
     /* Thêm vào file CSS của bạn */
     /*.main-nav a[asp-controller="Doctor"] {
         color: #111 !important;*/ /* Thay #your-color bằng màu bạn muốn */
@@ -118,7 +106,7 @@ body {
 
 
 .search-section {
-    background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQa3_zuvcqTyOXXSYmZXFyNqtLh8rnOwo5_A&s') no-repeat center center;
+    background: url('/image/Podcast/banner2.png') no-repeat center center;
     background-size: cover;
     padding: 80px 0;
     display: flex;
