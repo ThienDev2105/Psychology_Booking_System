@@ -159,26 +159,28 @@
         }
 
         // Xử lý sự kiện khi chọn đáp án
-        function handleOptionSelection(questionNumber, isAnswered) {
+                function handleOptionSelection(questionNumber, isAnswered) {
             answeredQuestions[questionNumber - 1] = isAnswered;
             updateAnsweredQuestions();
 
-            // Tự động chuyển sang câu hỏi tiếp theo nếu không phải câu cuối
-            if (questionNumber < totalQuestions) {
+            // Chỉ tự động chuyển nếu không phải câu cuối
+            if (questionNumber < totalQuestions && isAnswered) {
                 document.querySelector(`[data-question="${questionNumber}"]`).style.display = 'none';
                 currentQuestion = questionNumber + 1;
                 document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'block';
 
                 // Cập nhật trạng thái nút
                 document.getElementById('prev-btn').disabled = false;
-                if (currentQuestion === totalQuestions) {
-                    document.getElementById('next-btn').style.display = 'none';
-                    document.getElementById('submit-btn').style.display = 'inline-block';
-                }
-            } else {
-                // Nếu là câu cuối, hiển thị nút gửi kết quả
+            }
+
+            // Chỉ hiển thị nút submit khi ở câu cuối và đã trả lời
+            if (questionNumber === totalQuestions && isAnswered) {
                 document.getElementById('next-btn').style.display = 'none';
                 document.getElementById('submit-btn').style.display = 'inline-block';
+            } else if (currentQuestion === totalQuestions) {
+                // Ở câu cuối nhưng chưa trả lời thì vẫn hiển thị nút next
+                document.getElementById('next-btn').style.display = 'inline-block';
+                document.getElementById('submit-btn').style.display = 'none';
             }
         }
 
@@ -195,20 +197,24 @@
             });
 
             // Xử lý nút Previous
-            document.getElementById('prev-btn').addEventListener('click', function() {
-                if (currentQuestion > 1) {
-                    document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'none';
-                    currentQuestion--;
-                    document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'block';
+                    // Xử lý nút Next
+        document.getElementById('next-btn').addEventListener('click', function() {
+            if (currentQuestion < totalQuestions) {
+                document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'none';
+                currentQuestion++;
+                document.querySelector(`[data-question="${currentQuestion}"]`).style.display = 'block';
 
-                    // Cập nhật trạng thái nút
-                    document.getElementById('next-btn').style.display = 'inline-block';
-                    document.getElementById('submit-btn').style.display = 'none';
-                    if (currentQuestion === 1) {
-                        this.disabled = true;
+                // Cập nhật trạng thái nút
+                document.getElementById('prev-btn').disabled = false;
+                if (currentQuestion === totalQuestions) {
+                    // Ở câu cuối, kiểm tra nếu đã trả lời thì hiển thị submit, không thì vẫn next
+                    if (answeredQuestions[currentQuestion - 1]) {
+                        this.style.display = 'none';
+                        document.getElementById('submit-btn').style.display = 'inline-block';
                     }
                 }
-            });
+            }
+        });
 
             // Xử lý submit form
             document.getElementById('dassForm').addEventListener('submit', function(e) {

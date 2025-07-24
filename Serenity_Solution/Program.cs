@@ -96,6 +96,7 @@ builder.Services.AddAuthorization(); // Ensure authorization is added
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+//builder.Services.AddMvc().AddSessionStateTempDataProvider();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(20);
@@ -153,7 +154,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-
+app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

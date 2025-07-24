@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Kết quả bài Test DASS-21";
-
+    var hasPaid = (bool)(ViewData["HasPaidDASS21Test"] ?? false);
+    var hasSuccessMessage = TempData["Testsuccess"] != null;
     // Calculate percentages based on scores
     int depressionScore = ViewData["DepressionScore"] != null ? Convert.ToInt32(ViewData["DepressionScore"]) : 0;
     int anxietyScore = ViewData["AnxietyScore"] != null ? Convert.ToInt32(ViewData["AnxietyScore"]) : 0;
@@ -212,6 +213,108 @@
     System.Diagnostics.Debug.WriteLine($"Has Severe: {hasSevereCondition}, Has Moderate: {hasModerateCondition}, Has Both Severe: {hasBothSevere}, Has All Severe: {hasAllSevere}");
     System.Diagnostics.Debug.WriteLine($"Advice Type: {adviceType}");
 }
+
+<style>
+    /* Copy từ Index.cshtml */
+    .toast-notification {
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        min-width: 300px;
+    }
+
+        .toast-notification.show {
+            display: flex;
+            transform: translateX(0);
+        }
+
+        .toast-notification.toast-error {
+            background: #f44336;
+        }
+
+    .toast-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toast-icon {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .toast-message {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .payment-container {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        margin: 20px auto;
+        max-width: 600px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .payment-btn {
+        background: linear-gradient(45deg, #4e54c8, #8f94fb);
+        color: white;
+        font-weight: bold;
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(78, 84, 200, 0.3);
+        margin-top: 20px;
+    }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 84, 200, 0.4);
+        }
+
+    .btn-spinner {
+        border: 3px solid #fff;
+        border-top: 3px solid #8f94fb;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 10px;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .result-summary {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+</style>
 
 <link rel="stylesheet" href="~/css/test.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -510,99 +613,116 @@
         <div class="result-recommendations">
             <h2>Lời khuyên của chuyên gia</h2>
 
-            <div class="expert-advice">
-                @if (adviceType == "A")
-                {
-                    <p>Chúc mừng bạn!</p>
-                    <p>Kết quả của bạn cho thấy bạn không gặp phải dấu hiệu nào của rối loạn lo âu. Tuy nhiên, hãy luôn chú ý giữ gìn sức khỏe tinh thần của mình bằng cách:</p>
-                    <div class="advice-section">
-                        <ul>
-                            <li><strong>Duy trì một lối sống lành mạnh:</strong> ăn uống đủ chất, ngủ đủ giấc, và vận động thể dục thường xuyên.</li>
-                            <li><strong>Thực hiện các hoạt động quản lý stress:</strong> như thiền, yoga, hoặc hít thở sâu.</li>
-                            <li><strong>Kết nối xã hội:</strong> dành thời gian với gia đình và bạn bè.</li>
-                            <li><strong>Thư giãn và giải trí:</strong> tìm kiếm những hoạt động bạn yêu thích và dành thời gian cho bản thân.</li>
-                        </ul>
-                    </div>
-                    <p>Nếu có bất kỳ thay đổi nào trong cảm xúc hoặc tình trạng tâm lý, đừng ngần ngại tìm đến sự hỗ trợ từ người thân, bạn bè hoặc chuyên gia. Bạn đã làm rất tốt rồi!</p>
-                }
-                else if (adviceType == "B")
-                {
-                    <p>Gửi đến bạn cái ôm đầy sự chia sẻ và thấu hiểu.</p>
-                    <p>Là một chuyên gia tâm lý, tôi thấu hiểu những khó khăn và áp lực mà mỗi người đang phải đối mặt trong cuộc sống. Cuộc sống hiện đại với nhịp sống hối hả, nhiều lo toan có thể khiến chúng ta dễ dàng rơi vào trạng thái lo âu, căng thẳng hay stress, ảnh hưởng đến sức khỏe tinh thần và thể chất. Điều quan trọng là chúng ta cần nhận thức được vấn đề và tìm kiếm giải pháp để cải thiện.</p>
+            @if (!hasPaid)
+            {
+                <div class="payment-container">
+                    <h3>Để xem lời khuyên chi tiết từ chuyên gia</h3>
+                    <p>Vui lòng thanh toán phí 29.000 VNĐ để mở khóa phần phân tích chuyên sâu và lời khuyên từ bác sĩ tâm lý.</p>
 
-                    <div class="advice-section">
-                        <h3>Về trầm cảm và lo âu:</h3>
-                        <p>Kết quả bài test cho thấy bạn đang mắc phải vấn đề rối loạn Trầm Cảm - Lo Âu mức độ vừa. Ngoài việc hãy dành nhiều thời gian để thư giãn, bạn có thể tìm kiếm sự hỗ trợ từ các chuyên gia tâm lý. Hãy thử tìm cách giảm bớt Trầm Cảm - Lo Âu qua các hoạt động sau:</p>
-                        <ul>
-                            <li><strong>Tập thể dục thường xuyên:</strong> Hoạt động thể chất giúp giải phóng endorphin - hormone hạnh phúc, đồng thời giúp giảm căng thẳng và cải thiện tâm trạng. Bạn có thể chọn các bài tập phù hợp với sở thích và khả năng của bản thân như đi bộ, chạy bộ, bơi lội, yoga,...</li>
-                            <li><strong>Tâm sự với người thân:</strong> Đừng ngại chia sẻ cảm xúc của mình để nhận được sự hỗ trợ.</li>
-                            <li><strong>Hạn chế sử dụng chất kích thích:</strong> Rượu bia, thuốc lá, caffeine có thể khiến tình trạng căng thẳng thêm tồi tệ.</li>
-                        </ul>
-                    </div>
+                    <button id="paymentBtn" class="payment-btn">
+                        <span class="btn-text">Thanh toán 29.000 VNĐ</span>
+                        <span class="btn-spinner" style="display:none;"></span>
+                    </button>
 
-                    <div class="advice-section">
-                        <h3>Về stress:</h3>
+                    <p class="text-muted mt-3">Sau khi thanh toán thành công, trang sẽ tự động tải lại để hiển thị nội dung.</p>
+                </div>
+            }
+            else
+            {
+                <div class="expert-advice">
+                    @if (adviceType == "A")
+                    {
                         <p>Chúc mừng bạn!</p>
                         <p>Kết quả của bạn cho thấy bạn không gặp phải dấu hiệu nào của rối loạn lo âu. Tuy nhiên, hãy luôn chú ý giữ gìn sức khỏe tinh thần của mình bằng cách:</p>
-                        <ul>
-                            <li><strong>Duy trì một lối sống lành mạnh:</strong> ăn uống đủ chất, ngủ đủ giấc, và vận động thể dục thường xuyên.</li>
-                            <li><strong>Thực hiện các hoạt động quản lý stress:</strong> như thiền, yoga, hoặc hít thở sâu.</li>
-                            <li><strong>Kết nối xã hội:</strong> dành thời gian với gia đình và bạn bè.</li>
-                            <li><strong>Thư giãn và giải trí:</strong> tìm kiếm những hoạt động bạn yêu thích và dành thời gian cho bản thân.</li>
-                        </ul>
-                    </div>
+                        <div class="advice-section">
+                            <ul>
+                                <li><strong>Duy trì một lối sống lành mạnh:</strong> ăn uống đủ chất, ngủ đủ giấc, và vận động thể dục thường xuyên.</li>
+                                <li><strong>Thực hiện các hoạt động quản lý stress:</strong> như thiền, yoga, hoặc hít thở sâu.</li>
+                                <li><strong>Kết nối xã hội:</strong> dành thời gian với gia đình và bạn bè.</li>
+                                <li><strong>Thư giãn và giải trí:</strong> tìm kiếm những hoạt động bạn yêu thích và dành thời gian cho bản thân.</li>
+                            </ul>
+                        </div>
+                        <p>Nếu có bất kỳ thay đổi nào trong cảm xúc hoặc tình trạng tâm lý, đừng ngần ngại tìm đến sự hỗ trợ từ người thân, bạn bè hoặc chuyên gia. Bạn đã làm rất tốt rồi!</p>
+                    }
+                    else if (adviceType == "B")
+                    {
+                        <p>Gửi đến bạn cái ôm đầy sự chia sẻ và thấu hiểu.</p>
+                        <p>Là một chuyên gia tâm lý, tôi thấu hiểu những khó khăn và áp lực mà mỗi người đang phải đối mặt trong cuộc sống. Cuộc sống hiện đại với nhịp sống hối hả, nhiều lo toan có thể khiến chúng ta dễ dàng rơi vào trạng thái lo âu, căng thẳng hay stress, ảnh hưởng đến sức khỏe tinh thần và thể chất. Điều quan trọng là chúng ta cần nhận thức được vấn đề và tìm kiếm giải pháp để cải thiện.</p>
 
-                    <p>Nếu có bất kỳ thay đổi nào trong cảm xúc hoặc tình trạng tâm lý, đừng ngần ngại tìm đến sự hỗ trợ từ người thân, bạn bè hoặc chuyên gia. Chăm sóc sức khỏe tâm lý là một hành trình liên tục, và bạn đang làm rất tốt!</p>
-                }
-                else if (adviceType == "C")
-                {
-                    <p>Gửi đến bạn cái ôm đầy sự chia sẻ và thấu hiểu.</p>
-                    <p>Là một chuyên gia tâm lý, tôi thấu hiểu những khó khăn và áp lực mà mỗi người đang phải đối mặt trong cuộc sống. Cuộc sống hiện đại với nhịp sống hối hả, nhiều lo toan có thể khiến chúng ta dễ dàng rơi vào trạng thái lo âu, căng thẳng hay stress, ảnh hưởng đến sức khỏe tinh thần và thể chất. Điều quan trọng là chúng ta cần nhận thức được vấn đề và tìm kiếm giải pháp để cải thiện.</p>
+                        <div class="advice-section">
+                            <h3>Về trầm cảm và lo âu:</h3>
+                            <p>Kết quả bài test cho thấy bạn đang mắc phải vấn đề rối loạn Trầm Cảm - Lo Âu mức độ vừa. Ngoài việc hãy dành nhiều thời gian để thư giãn, bạn có thể tìm kiếm sự hỗ trợ từ các chuyên gia tâm lý. Hãy thử tìm cách giảm bớt Trầm Cảm - Lo Âu qua các hoạt động sau:</p>
+                            <ul>
+                                <li><strong>Tập thể dục thường xuyên:</strong> Hoạt động thể chất giúp giải phóng endorphin - hormone hạnh phúc, đồng thời giúp giảm căng thẳng và cải thiện tâm trạng. Bạn có thể chọn các bài tập phù hợp với sở thích và khả năng của bản thân như đi bộ, chạy bộ, bơi lội, yoga,...</li>
+                                <li><strong>Tâm sự với người thân:</strong> Đừng ngại chia sẻ cảm xúc của mình để nhận được sự hỗ trợ.</li>
+                                <li><strong>Hạn chế sử dụng chất kích thích:</strong> Rượu bia, thuốc lá, caffeine có thể khiến tình trạng căng thẳng thêm tồi tệ.</li>
+                            </ul>
+                        </div>
 
-                    <div class="advice-section">
-                        <h3>Về trầm cảm và lo âu:</h3>
-                        <p>Dựa và kết quả bài test có thể thấy bạn là người đang gặp những vấn đề về rối loạn Trầm Cảm - Lo Âu cực kỳ nghiêm trọng. Dưới đây là một số phương pháp và sự hỗ trợ để giúp bạn vượt qua tình trạng Trầm Cảm - Lo Âu rất nặng:</p>
-                        <ul>
-                            <li><strong>Tìm kiếm hỗ trợ chuyên nghiệp ngay lập tức:</strong> Nếu bạn đã thử nhiều cách mà vẫn không thể cải thiện tình trạng căng thẳng, stress, hãy tìm đến sự trợ giúp của chuyên gia tâm lý. Các chuyên gia sẽ hỗ trợ bạn tìm hiểu nguyên nhân gốc rễ của vấn đề và đưa ra phương pháp điều trị phù hợp.</li>
-                            <li><strong>Không cô lập bản thân:</strong> Đừng ngần ngại tìm kiếm sự giúp đỡ từ gia đình và bạn bè. Họ luôn sẵn lòng lắng nghe và hỗ trợ bạn.</li>
-                            <li><strong>Thiết lập thói quen hàng ngày khoa học:</strong> ăn uống và ngủ nghỉ đúng giờ, tập thể dục đều đặn.</li>
-                            <li><strong>Tìm kiếm nhóm hỗ trợ:</strong> Bạn có thể tham gia các nhóm có cùng tình trạng để chia sẻ và học hỏi kinh nghiệm từ người khác.</li>
-                            <li><strong>Chia sẻ cảm xúc:</strong> Chia sẻ những cảm xúc, tâm tư với người mà bạn tin tưởng như bạn bè, thành viên gia đình hoặc chuyên gia tâm lý. Việc kìm nén cảm xúc chỉ khiến bạn thêm nặng nề.</li>
-                        </ul>
-                    </div>
+                        <div class="advice-section">
+                            <h3>Về stress:</h3>
+                            <p>Chúc mừng bạn!</p>
+                            <p>Kết quả của bạn cho thấy bạn không gặp phải dấu hiệu nào của rối loạn lo âu. Tuy nhiên, hãy luôn chú ý giữ gìn sức khỏe tinh thần của mình bằng cách:</p>
+                            <ul>
+                                <li><strong>Duy trì một lối sống lành mạnh:</strong> ăn uống đủ chất, ngủ đủ giấc, và vận động thể dục thường xuyên.</li>
+                                <li><strong>Thực hiện các hoạt động quản lý stress:</strong> như thiền, yoga, hoặc hít thở sâu.</li>
+                                <li><strong>Kết nối xã hội:</strong> dành thời gian với gia đình và bạn bè.</li>
+                                <li><strong>Thư giãn và giải trí:</strong> tìm kiếm những hoạt động bạn yêu thích và dành thời gian cho bản thân.</li>
+                            </ul>
+                        </div>
 
-                    <div class="advice-section">
-                        <h3>Về stress:</h3>
-                        <p>Kết quả bài test đã chỉ ra bạn đang gặp vấn đề về rối loạn Stress mức độ nặng. Việc bạn có thể tự cân bằng hoặc tìm cho mình sự hỗ trợ từ một chuyên gia tâm lý sẽ là một quyết định tốt trong trường hợp này. Một số gợi ý mà bạn nên áp dụng để giảm bớt tình trạng Stress nặng:</p>
-                        <ul>
-                            <li><strong>Tìm kiếm sự hỗ trợ từ chuyên gia:</strong> như nhà tâm lý học hoặc bác sĩ tâm thần. Điều này sẽ giúp bạn hiểu rõ hơn về tình trạng của mình cũng như cách để điều trị nhanh chóng và hiệu quả.</li>
-                            <li><strong>Thực hiện các bài tập thể dục và thư giãn:</strong> như yoga, thiền, hoặc hít thở sâu để giảm stress. Thiền giúp bạn tập trung vào hiện tại, loại bỏ những suy nghĩ tiêu cực và bình tĩnh tâm trí.</li>
-                            <li><strong>Đảm bảo giấc ngủ đủ và chất lượng:</strong> giúp cơ thể và tinh thần được phục hồi.</li>
-                            <li><strong>Hạn chế sử dụng chất kích thích:</strong> Rượu bia, thuốc lá, caffeine có thể khiến tình trạng căng thẳng thêm tồi tệ.</li>
-                        </ul>
-                    </div>
+                        <p>Nếu có bất kỳ thay đổi nào trong cảm xúc hoặc tình trạng tâm lý, đừng ngần ngại tìm đến sự hỗ trợ từ người thân, bạn bè hoặc chuyên gia. Chăm sóc sức khỏe tâm lý là một hành trình liên tục, và bạn đang làm rất tốt!</p>
+                    }
+                    else if (adviceType == "C")
+                    {
+                        <p>Gửi đến bạn cái ôm đầy sự chia sẻ và thấu hiểu.</p>
+                        <p>Là một chuyên gia tâm lý, tôi thấu hiểu những khó khăn và áp lực mà mỗi người đang phải đối mặt trong cuộc sống. Cuộc sống hiện đại với nhịp sống hối hả, nhiều lo toan có thể khiến chúng ta dễ dàng rơi vào trạng thái lo âu, căng thẳng hay stress, ảnh hưởng đến sức khỏe tinh thần và thể chất. Điều quan trọng là chúng ta cần nhận thức được vấn đề và tìm kiếm giải pháp để cải thiện.</p>
 
-                    <p>Hãy nhớ rằng, bạn không đơn độc! Rất nhiều người đang trải qua những điều tương tự như bạn, giữ vững niềm tin và không bỏ cuộc nhé!</p>
-                }
-                else
-                {
-                    <p>Gửi đến bạn cái ôm đầy sự chia sẻ và thấu hiểu.</p>
-                    <p>Là một chuyên gia tâm lý, tôi thấu hiểu những khó khăn và áp lực mà mỗi người đang phải đối mặt trong cuộc sống. Cuộc sống hiện đại với nhịp sống hối hả, nhiều lo toan có thể khiến chúng ta dễ dàng rơi vào trạng thái lo âu, căng thẳng hay stress, ảnh hưởng đến sức khỏe tinh thần và thể chất. Điều quan trọng là chúng ta cần nhận thức được vấn đề và tìm kiếm giải pháp để cải thiện.</p>
+                        <div class="advice-section">
+                            <h3>Về trầm cảm và lo âu:</h3>
+                            <p>Dựa và kết quả bài test có thể thấy bạn là người đang gặp những vấn đề về rối loạn Trầm Cảm - Lo Âu cực kỳ nghiêm trọng. Dưới đây là một số phương pháp và sự hỗ trợ để giúp bạn vượt qua tình trạng Trầm Cảm - Lo Âu rất nặng:</p>
+                            <ul>
+                                <li><strong>Tìm kiếm hỗ trợ chuyên nghiệp ngay lập tức:</strong> Nếu bạn đã thử nhiều cách mà vẫn không thể cải thiện tình trạng căng thẳng, stress, hãy tìm đến sự trợ giúp của chuyên gia tâm lý. Các chuyên gia sẽ hỗ trợ bạn tìm hiểu nguyên nhân gốc rễ của vấn đề và đưa ra phương pháp điều trị phù hợp.</li>
+                                <li><strong>Không cô lập bản thân:</strong> Đừng ngần ngại tìm kiếm sự giúp đỡ từ gia đình và bạn bè. Họ luôn sẵn lòng lắng nghe và hỗ trợ bạn.</li>
+                                <li><strong>Thiết lập thói quen hàng ngày khoa học:</strong> ăn uống và ngủ nghỉ đúng giờ, tập thể dục đều đặn.</li>
+                                <li><strong>Tìm kiếm nhóm hỗ trợ:</strong> Bạn có thể tham gia các nhóm có cùng tình trạng để chia sẻ và học hỏi kinh nghiệm từ người khác.</li>
+                                <li><strong>Chia sẻ cảm xúc:</strong> Chia sẻ những cảm xúc, tâm tư với người mà bạn tin tưởng như bạn bè, thành viên gia đình hoặc chuyên gia tâm lý. Việc kìm nén cảm xúc chỉ khiến bạn thêm nặng nề.</li>
+                            </ul>
+                        </div>
 
-                    <div class="advice-section">
-                        <p>Dựa và kết quả bài test có thể thấy bạn là người đang gặp những vấn đề về rối loạn Trầm Cảm - Lo Âu - Stress cực kỳ nghiêm trọng. Dưới đây là một số phương pháp và sự hỗ trợ để giúp bạn vượt qua tình trạng Trầm Cảm - Lo Âu - Stress rất nặng:</p>
-                        <ul>
-                            <li><strong>Tìm kiếm hỗ trợ chuyên nghiệp ngay lập tức:</strong> Nếu bạn đã thử nhiều cách mà vẫn không thể cải thiện tình trạng căng thẳng, stress, hãy tìm đến sự trợ giúp của chuyên gia tâm lý. Các chuyên gia sẽ hỗ trợ bạn tìm hiểu nguyên nhân gốc rễ của vấn đề và đưa ra phương pháp điều trị phù hợp.</li>
-                            <li><strong>Không cô lập bản thân:</strong> Đừng ngần ngại tìm kiếm sự giúp đỡ từ gia đình và bạn bè. Họ luôn sẵn lòng lắng nghe và hỗ trợ bạn.</li>
-                            <li><strong>Thiết lập thói quen hàng ngày khoa học:</strong> ăn uống và ngủ nghỉ đúng giờ, tập thể dục đều đặn.</li>
-                            <li><strong>Tìm kiếm nhóm hỗ trợ:</strong> Bạn có thể tham gia các nhóm có cùng tình trạng để chia sẻ và học hỏi kinh nghiệm từ người khác.</li>
-                            <li><strong>Chia sẻ cảm xúc:</strong> Chia sẻ những cảm xúc, tâm tư với người mà bạn tin tưởng như bạn bè, thành viên gia đình hoặc chuyên gia tâm lý. Việc kìm nén cảm xúc chỉ khiến bạn thêm nặng nề.</li>
-                        </ul>
-                    </div>
+                        <div class="advice-section">
+                            <h3>Về stress:</h3>
+                            <p>Kết quả bài test đã chỉ ra bạn đang gặp vấn đề về rối loạn Stress mức độ nặng. Việc bạn có thể tự cân bằng hoặc tìm cho mình sự hỗ trợ từ một chuyên gia tâm lý sẽ là một quyết định tốt trong trường hợp này. Một số gợi ý mà bạn nên áp dụng để giảm bớt tình trạng Stress nặng:</p>
+                            <ul>
+                                <li><strong>Tìm kiếm sự hỗ trợ từ chuyên gia:</strong> như nhà tâm lý học hoặc bác sĩ tâm thần. Điều này sẽ giúp bạn hiểu rõ hơn về tình trạng của mình cũng như cách để điều trị nhanh chóng và hiệu quả.</li>
+                                <li><strong>Thực hiện các bài tập thể dục và thư giãn:</strong> như yoga, thiền, hoặc hít thở sâu để giảm stress. Thiền giúp bạn tập trung vào hiện tại, loại bỏ những suy nghĩ tiêu cực và bình tĩnh tâm trí.</li>
+                                <li><strong>Đảm bảo giấc ngủ đủ và chất lượng:</strong> giúp cơ thể và tinh thần được phục hồi.</li>
+                                <li><strong>Hạn chế sử dụng chất kích thích:</strong> Rượu bia, thuốc lá, caffeine có thể khiến tình trạng căng thẳng thêm tồi tệ.</li>
+                            </ul>
+                        </div>
 
-                    <p>Hãy nhớ rằng, cảm giác lo âu không định nghĩa con người bạn và bạn hoàn toàn có thể tìm lại sự bình yên trong tâm hồn. Bạn là một người dũng cảm, và mình tin rằng bạn sẽ vượt qua được giai đoạn này. Hãy nhớ rằng, bạn không đơn độc! Rất nhiều người đang trải qua những điều tương tự như bạn, giữ vững niềm tin và không bỏ cuộc nhé!</p>
-                }
-            </div>
+                        <p>Hãy nhớ rằng, bạn không đơn độc! Rất nhiều người đang trải qua những điều tương tự như bạn, giữ vững niềm tin và không bỏ cuộc nhé!</p>
+                    }
+                    else
+                    {
+                        <p>Gửi đến bạn cái ôm đầy sự chia sẻ và thấu hiểu.</p>
+                        <p>Là một chuyên gia tâm lý, tôi thấu hiểu những khó khăn và áp lực mà mỗi người đang phải đối mặt trong cuộc sống. Cuộc sống hiện đại với nhịp sống hối hả, nhiều lo toan có thể khiến chúng ta dễ dàng rơi vào trạng thái lo âu, căng thẳng hay stress, ảnh hưởng đến sức khỏe tinh thần và thể chất. Điều quan trọng là chúng ta cần nhận thức được vấn đề và tìm kiếm giải pháp để cải thiện.</p>
+
+                        <div class="advice-section">
+                            <p>Dựa và kết quả bài test có thể thấy bạn là người đang gặp những vấn đề về rối loạn Trầm Cảm - Lo Âu - Stress cực kỳ nghiêm trọng. Dưới đây là một số phương pháp và sự hỗ trợ để giúp bạn vượt qua tình trạng Trầm Cảm - Lo Âu - Stress rất nặng:</p>
+                            <ul>
+                                <li><strong>Tìm kiếm hỗ trợ chuyên nghiệp ngay lập tức:</strong> Nếu bạn đã thử nhiều cách mà vẫn không thể cải thiện tình trạng căng thẳng, stress, hãy tìm đến sự trợ giúp của chuyên gia tâm lý. Các chuyên gia sẽ hỗ trợ bạn tìm hiểu nguyên nhân gốc rễ của vấn đề và đưa ra phương pháp điều trị phù hợp.</li>
+                                <li><strong>Không cô lập bản thân:</strong> Đừng ngần ngại tìm kiếm sự giúp đỡ từ gia đình và bạn bè. Họ luôn sẵn lòng lắng nghe và hỗ trợ bạn.</li>
+                                <li><strong>Thiết lập thói quen hàng ngày khoa học:</strong> ăn uống và ngủ nghỉ đúng giờ, tập thể dục đều đặn.</li>
+                                <li><strong>Tìm kiếm nhóm hỗ trợ:</strong> Bạn có thể tham gia các nhóm có cùng tình trạng để chia sẻ và học hỏi kinh nghiệm từ người khác.</li>
+                                <li><strong>Chia sẻ cảm xúc:</strong> Chia sẻ những cảm xúc, tâm tư với người mà bạn tin tưởng như bạn bè, thành viên gia đình hoặc chuyên gia tâm lý. Việc kìm nén cảm xúc chỉ khiến bạn thêm nặng nề.</li>
+                            </ul>
+                        </div>
+
+                        <p>Hãy nhớ rằng, cảm giác lo âu không định nghĩa con người bạn và bạn hoàn toàn có thể tìm lại sự bình yên trong tâm hồn. Bạn là một người dũng cảm, và mình tin rằng bạn sẽ vượt qua được giai đoạn này. Hãy nhớ rằng, bạn không đơn độc! Rất nhiều người đang trải qua những điều tương tự như bạn, giữ vững niềm tin và không bỏ cuộc nhé!</p>
+                    }
+                </div>
+            }
 
             <div class="resource-cards">
                 <div class="resource-card">
@@ -640,6 +760,92 @@
         </div>
     </div>
 </div>
+
+<!-- Toast notification -->
+<div id="toastNotification" class="toast-notification">
+    <div class="toast-content">
+        <i class="toast-icon">✓</i>
+        <span class="toast-message">Đã thanh toán thành công</span>
+    </div>
+</div>
+
+<script>
+    const isAuthenticated = @(User.Identity.IsAuthenticated.ToString().ToLower());
+    const hasPaid = @(hasPaid.ToString().ToLower());
+    const hasSuccessMessage = @(hasSuccessMessage.ToString().ToLower());
+
+    // Hiển thị toast nếu thanh toán thành công
+    if (hasSuccessMessage) {
+        showToast("Đã thanh toán thành công");
+    }
+
+    // Xử lý nút thanh toán
+    document.getElementById('paymentBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (!isAuthenticated) {
+            alert('Vui lòng đăng nhập trước khi thực hiện hành động này!');
+            window.location.href = '/Account/Login';
+            return;
+        }
+
+        const btn = this;
+        const textSpan = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.btn-spinner');
+
+        btn.disabled = true;
+        textSpan.style.display = 'none';
+        spinner.style.display = 'inline-block';
+
+        fetch('/Test/Payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({
+                TestType: 'DASS21'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+            } else {
+                throw new Error(data.message || 'Payment request failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            btn.disabled = false;
+            textSpan.style.display = 'inline-block';
+            spinner.style.display = 'none';
+            showToast(error.message || 'Có lỗi xảy ra khi xử lý thanh toán', 'error');
+        });
+    });
+
+    function showToast(message = 'Đã thanh toán thành công', type = 'success') {
+        const toast = document.getElementById('toastNotification');
+        const messageElement = toast.querySelector('.toast-message');
+        const iconElement = toast.querySelector('.toast-icon');
+
+        messageElement.textContent = message;
+
+        if (type === 'error') {
+            toast.classList.add('toast-error');
+            iconElement.textContent = '✕';
+        } else {
+            toast.classList.remove('toast-error');
+            iconElement.textContent = '✓';
+        }
+
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+</script>
 
 <style>
     body {

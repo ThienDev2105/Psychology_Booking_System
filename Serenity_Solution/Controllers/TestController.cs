@@ -43,7 +43,7 @@ namespace Serenity_Solution.Controllers
                 hasPaid = user?.HasPaidDASS21Test ?? false;
             }
 
-            ViewData["HasPaidDASS21Test"] = hasPaid;
+            ViewData["HasPaidDASS21Test"] = true;
             return View();
         }
         [Authorize]
@@ -143,7 +143,7 @@ namespace Serenity_Solution.Controllers
                     TempData["Testsuccess"] = "Thanh toán thành công";
                    
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(DASS21Result));
             }
             catch (Exception ex)
             {
@@ -235,6 +235,16 @@ namespace Serenity_Solution.Controllers
                 System.Diagnostics.Debug.WriteLine($"Total questions answered: {model.AnsweredCount}");
                 System.Diagnostics.Debug.WriteLine($"Answered questions array: {string.Join(", ", model.AnsweredQuestions)}");
 
+                // Lưu toàn bộ kết quả vào Session
+                HttpContext.Session.SetInt32("DepressionScore", model.DepressionScore);
+                HttpContext.Session.SetInt32("AnxietyScore", model.AnxietyScore);
+                HttpContext.Session.SetInt32("StressScore", model.StressScore);
+                HttpContext.Session.SetString("DepressionLevel", model.DepressionLevel);
+                HttpContext.Session.SetString("AnxietyLevel", model.AnxietyLevel);
+                HttpContext.Session.SetString("StressLevel", model.StressLevel);
+                HttpContext.Session.SetInt32("AnsweredCount", model.AnsweredCount);
+                HttpContext.Session.SetString("AnsweredQuestions", AnsweredQuestions);
+
                 // Chuyển đến trang kết quả với các tham số cần thiết
                 return RedirectToAction("DASS21Result", new
                 {
@@ -259,25 +269,47 @@ namespace Serenity_Solution.Controllers
 
         [HttpGet]
         [Route("DASS21Result")]
-        public IActionResult DASS21Result(
-            int depression,
-            int anxiety,
-            int stress,
+        public async Task<IActionResult> DASS21Result(
+            int? depression,
+            int? anxiety,
+            int? stress,
             string depressionLevel,
             string anxietyLevel,
             string stressLevel,
-            int answeredCount,
+            int? answeredCount,
             string answeredQuestions)
         {
             // Ensure we have values even if they weren't provided
-            depression = Math.Max(0, depression);
-            anxiety = Math.Max(0, anxiety);
-            stress = Math.Max(0, stress);
+            //depression = Math.Max(0, depression);
+            //anxiety = Math.Max(0, anxiety);
+            //stress = Math.Max(0, stress);
 
-            depressionLevel = string.IsNullOrEmpty(depressionLevel) ? "Bình thường" : depressionLevel;
-            anxietyLevel = string.IsNullOrEmpty(anxietyLevel) ? "Bình thường" : anxietyLevel;
-            stressLevel = string.IsNullOrEmpty(stressLevel) ? "Bình thường" : stressLevel;
+            //depressionLevel = string.IsNullOrEmpty(depressionLevel) ? "Bình thường" : depressionLevel;
+            //anxietyLevel = string.IsNullOrEmpty(anxietyLevel) ? "Bình thường" : anxietyLevel;
+            //stressLevel = string.IsNullOrEmpty(stressLevel) ? "Bình thường" : stressLevel;
 
+            // Ưu tiên lấy từ tham số, nếu không có thì lấy từ Session
+            depression = depression ?? HttpContext.Session.GetInt32("DepressionScore") ?? 0;
+            anxiety = anxiety ?? HttpContext.Session.GetInt32("AnxietyScore") ?? 0;
+            stress = stress ?? HttpContext.Session.GetInt32("StressScore") ?? 0;
+
+            depressionLevel = depressionLevel ?? HttpContext.Session.GetString("DepressionLevel") ?? "Bình thường";
+            anxietyLevel = anxietyLevel ?? HttpContext.Session.GetString("AnxietyLevel") ?? "Bình thường";
+            stressLevel = stressLevel ?? HttpContext.Session.GetString("StressLevel") ?? "Bình thường";
+
+            answeredCount = answeredCount ?? HttpContext.Session.GetInt32("AnsweredCount") ?? 0;
+            answeredQuestions = answeredQuestions ?? HttpContext.Session.GetString("AnsweredQuestions") ?? "[]";
+
+
+            bool hasPaid = false;
+
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                hasPaid = user?.HasPaidDASS21Test ?? false;
+            }
+
+            ViewData["HasPaidDASS21Test"] = hasPaid;
             // Set the values in ViewData
             ViewData["DepressionScore"] = depression;
             ViewData["AnxietyScore"] = anxiety;
