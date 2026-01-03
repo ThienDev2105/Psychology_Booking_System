@@ -24,6 +24,7 @@ namespace EXE201.Commons.Models
         public string Gender { get; set; } = "Unspecified"; // Male, Female, Other
         public string? CertificateUrl { get; set; }
         public bool HasPaidDASS21Test { get; set; } = false;
+        public DateTime? DatePayTest { get; set; } // Date when the user last logged in
 
         [NotMapped]
         public bool? DoctorCertificateUrl { get; set; } = false; // Indicates if the user has a doctor certificate
