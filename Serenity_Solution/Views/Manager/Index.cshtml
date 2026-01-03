@@ -17,6 +17,7 @@
     var TotalClient = ViewBag.AllClients as int? ?? 0;
     var TotalDoctors = ViewBag.AllDoctors as int? ?? 0;
     var totalRevenue = ViewBag.AllAmoutOfadmin as int? ?? 0;
+    var totalpriceOfTest = ViewBag.TotalPriceOfTest as int? ?? 0;
 }
 
 
@@ -125,6 +126,7 @@
         <div class="info-box">Khách hàng: @TotalClient</div>
         <div class="info-box">Bác sĩ: @TotalDoctors</div>
         <div class="info-box">Doanh thu admin thông qua đặt lịch: @totalRevenue</div>
+        <div class="info-box">Tổng giá trị từ thanh toán cho bài test: @totalpriceOfTest VND</div>
     </div>
 
     <!-- Line Chart (Người đăng ký) -->

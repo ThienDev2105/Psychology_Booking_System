@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serenity_Solution.Models;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Serenity_Solution.Controllers
 {
@@ -32,7 +33,7 @@ namespace Serenity_Solution.Controllers
             _signInManager = signInManager;
             _context = context;
         }
-        public IActionResult Index(int YearField = 0, int MonthField = 0)
+        public async Task<IActionResult> Index(int YearField = 0, int MonthField = 0)
         {
             // Lấy năm hiện tại nếu người dùng chưa chọn năm (YearField = 0)
             int currentYear = DateTime.Now.Year;
@@ -41,7 +42,8 @@ namespace Serenity_Solution.Controllers
             // Lấy toàn bộ dữ liệu cuộc hẹn có thời gian đặt lịch
             // ToList() để chuyển sang xử lý trên bộ nhớ (client-side) vì EF không thể translate các hàm như .Year
             var data = _context.Appointments
-                .Where(a => a.Scheduled_time != null)
+                .Where(a => a.Scheduled_time != null &&
+                            a.Psychologist.Email != "ChinhNguyen123@gmail.com")
                 .Include(a => a.Psychologist) // Bao gồm thông tin bác sĩ
                 .ToList();
 
@@ -50,7 +52,7 @@ namespace Serenity_Solution.Controllers
             var chartLine = dataUser
                .Where(u => u.CreateDate.HasValue && u.CreateDate.Value.Year == YearField &&
                     (MonthField == 0 || u.CreateDate.Value.Month == MonthField))
-                .GroupBy(u => MonthField == 0 
+                .GroupBy(u => MonthField == 0
                     ? u.CreateDate.Value.Month    // Nếu chọn cả năm: nhóm theo tháng
                     : u.CreateDate.Value.Day)     // Nếu chọn 1 tháng: nhóm theo ngày
                 .ToList();
@@ -95,6 +97,9 @@ namespace Serenity_Solution.Controllers
                 })
                 .ToList();
 
+            var priceOfTest = await _context.Users.Where(u => u.HasPaidDASS21Test == true).CountAsync();
+            var totalPriceOfTest = priceOfTest * 29000; // Giả sử mỗi bài test có giá 50
+
             // Truyền dữ liệu sang view để vẽ biểu đồ
             ViewBag.ChartLabels = chartData.Select(d => d.Label).ToList();  // Nhãn trục X
             ViewBag.ChartData = chartData.Select(d => d.Total).ToList();    // Giá trị trục Y (doanh thu)
@@ -138,6 +143,14 @@ namespace Serenity_Solution.Controllers
             {
                 ViewBag.AllAmoutOfadmin = AllAmoutOfadmin.BaBalance;
             }
+            if (totalPriceOfTest > 0)
+            {
+                ViewBag.TotalPriceOfTest = totalPriceOfTest;
+            }
+            else
+            {
+                ViewBag.TotalPriceOfTest = 0;
+            }
             return View();
         }
 
@@ -149,7 +162,7 @@ namespace Serenity_Solution.Controllers
                 .Where(c => c.CertificateUrl != null) // Lọc ra những người có yêu cầu nâng cấp
                 .ToList();
 
-            if(customers.Count == 0)
+            if (customers.Count == 0)
             {
                 TempData["NoWSDetail"] = true;
                 return RedirectToAction("Index");
@@ -253,7 +266,7 @@ namespace Serenity_Solution.Controllers
 
             return View(pagedUsers);
         }
-        
+
 
         [HttpPost]
         public async Task<IActionResult> Resolve(string UserId, string ResponseContent)
@@ -273,32 +286,32 @@ namespace Serenity_Solution.Controllers
             return RedirectToAction("AllRequest");
         }
         #region blogs
-            public async Task<IActionResult> AllBlogs(int page = 1, int pageSize = 5)
+        public async Task<IActionResult> AllBlogs(int page = 1, int pageSize = 5)
+        {
+            var blogs = await _context.Blogs
+                .Where(b => b.Status == false)
+                .Include(b => b.Author)
+                .ToListAsync();
+            if (blogs.Count == 0)
             {
-                var blogs = await _context.Blogs
-                    .Where(b => b.Status == false)
-                    .Include(b => b.Author)
-                    .ToListAsync();
-                if (blogs.Count == 0)
-                {
-                    TempData["NoWSDetail"] = true;
-                    return RedirectToAction("Index");
-                }
-                var blogList = blogs.Select(b => new BlogViewModel
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    Content = b.Content,
-                    AuthorName = b.Author.Name,
-                    CreatedAt = b.CreateDate,
-                    ThumbnailUrl = b.ThumbnailUrl
-                }).ToList();
-                int totalBlogs = blogList.Count();
-                var pagedBlogs = blogList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                ViewBag.TotalPages = (int)Math.Ceiling((double)totalBlogs / pageSize);
-                ViewBag.CurrentPage = page;
-                return View(pagedBlogs);
+                TempData["NoWSDetail"] = true;
+                return RedirectToAction("Index");
             }
+            var blogList = blogs.Select(b => new BlogViewModel
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Content = b.Content,
+                AuthorName = b.Author.Name,
+                CreatedAt = b.CreateDate,
+                ThumbnailUrl = b.ThumbnailUrl
+            }).ToList();
+            int totalBlogs = blogList.Count();
+            var pagedBlogs = blogList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalBlogs / pageSize);
+            ViewBag.CurrentPage = page;
+            return View(pagedBlogs);
+        }
 
         [HttpGet]
         public async Task<IActionResult> BlogDetails(int id)
@@ -306,7 +319,7 @@ namespace Serenity_Solution.Controllers
             var blog = await _context.Blogs.Include(b => b.Author).FirstOrDefaultAsync(b => b.Id == id && b.Status == false);
             if (blog == null)
                 return NotFound();
-            
+
             return View(blog);
         }
 
@@ -390,7 +403,7 @@ namespace Serenity_Solution.Controllers
             return RedirectToAction("UpgradeRequest");
         }
 
-    
+
 
         [HttpPost]
         public async Task<IActionResult> RejectUpgrade(string email)
@@ -399,7 +412,7 @@ namespace Serenity_Solution.Controllers
             if (user != null)
             {
                 // Cập nhật trạng thái của người dùng
-                var customer = user ;
+                var customer = user;
                 if (customer != null)
                 {
                     customer.CertificateUrl = null;
@@ -414,8 +427,65 @@ namespace Serenity_Solution.Controllers
             return NotFound();
         }
 
-#endregion 
+        #endregion
+        [HttpGet]
+        public async Task<IActionResult> HisToryPayTest(int page = 1, int pageSize = 10)
+        {
+            var query = _context.Users
+                .Where(u => u.HasPaidDASS21Test == true)
+                .OrderByDescending(u => u.DatePayTest);
 
+            int totalUsers = await query.CountAsync();
+
+            var pagedUsers = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new UserPayTestViewModel
+                {
+                    UserId = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Phone = u.Phone,
+                    Address = u.Address,
+                    DatePayTest = u.DatePayTest,
+                    DateOfBirth = u.DateOfBirth,
+                    Gender = (u.Gender.ToLower() == "male" || u.Gender.ToLower() == "nam") ? "Nam"
+                               : (u.Gender.ToLower() == "female" || u.Gender.ToLower() == "nữ") ? "Nữ"
+                               : u.Gender, // fallback nếu khác
+                    Price = 290000
+                })
+                .ToListAsync();
+
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
+            ViewBag.CurrentPage = page;
+
+            return View(pagedUsers);
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple(List<string> selectedIds)
+        {
+            if (selectedIds == null || !selectedIds.Any())
+            {
+                TempData["ErrorMessage"] = "Không có người dùng nào được chọn để xóa.";
+                return RedirectToAction("HisToryPayTest");
+            }
+
+            foreach (var id in selectedIds)
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                if (user != null)
+                {
+                    user.HasPaidDASS21Test = false;
+                    _context.Users.Update(user);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã xóa trạng thái thanh toán của các người dùng đã chọn.";
+            return RedirectToAction("HisToryPayTest");
+        }
 
     }
 }

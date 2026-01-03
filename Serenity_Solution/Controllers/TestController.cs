@@ -129,8 +129,16 @@ namespace Serenity_Solution.Controllers
                     var currentUser = await _userManager.GetUserAsync(User);
                     if (currentUser != null)
                     {
+                        var startDate = new DateTime(2025, 7, 13);
+                        var endDate = new DateTime(2025, 7, 22);
+                        var random = new Random();
+
+                        int range = (endDate - startDate).Days + 1;
+
+
                         await _emailService.SendEmailAsync(currentUser.Email, "Thanh toán thất bại", "Thanh toán bài test không thành công. Vui lòng thử lại sau.");
                         currentUser.HasPaidDASS21Test = true;
+                        currentUser.DatePayTest = startDate.AddDays(random.Next(range));
                         await _userManager.UpdateAsync(currentUser);                       
                     }
                     var adminAmount = _userManager.Users.FirstOrDefault(u => u.Email == "admin@example.com");
