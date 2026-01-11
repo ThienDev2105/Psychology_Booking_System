@@ -21,7 +21,7 @@ Psychology Booking System là một ứng dụng web hỗ trợ đặt lịch t�
 
 ## Công nghệ sử dụng
 
-- Backend: .NET (C#)
+- Ngôn ngữ lập trình: C#, JavaScript
 - Framework: ASP.NET Core MVC
 - Frontend: HTML, CSS, JavaScript
 - Cơ sở dữ liệu: SQL Server
